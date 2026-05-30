@@ -1,5 +1,5 @@
 // server.js - Detective Jai Web Service
-// Calls your bot's API gateway at scam-detection.onrender.com
+// Your bot is always online (UptimeRobot keeps it alive)
 
 const express = require('express');
 const path = require('path');
@@ -22,29 +22,21 @@ app.post('/api/chat', async (req, res) => {
         return res.status(400).json({ error: 'Message is required' });
     }
     
-    // Set timeout for Render free tier (can take 30-50 seconds to wake up)
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 70000);
-    
     try {
         const response = await fetch(BOT_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, userId: userId || 'web_user' }),
-            signal: controller.signal
+            body: JSON.stringify({ message, userId: userId || 'web_user' })
         });
         
-        clearTimeout(timeoutId);
         const data = await response.json();
         res.json(data);
         
     } catch (err) {
-        clearTimeout(timeoutId);
         console.error('Error calling bot API:', err.message);
-        
-        // Friendly message when bot is waking up or unavailable
+        // Simple error message - bot should be online
         res.status(503).json({ 
-            response: `⚠️ *Bot is waking up...*\n\nOur scam detector runs on a free server. The first request takes **30-50 seconds** to wake up.\n\n🔄 Please wait a moment and try again.\n\n📱 *Or use our Telegram bot instantly:*\n@JoshuaGiwaBot\n\nThank you for your patience! 🇳🇬`
+            response: `⚠️ *Bot service temporarily unavailable*\n\nPlease try again in a moment or use our Telegram bot directly: @JoshuaGiwaBot`
         });
     }
 });
@@ -65,7 +57,7 @@ app.get('/api/stats', async (req, res) => {
         const data = await response.json();
         res.json(data);
     } catch (err) {
-        res.json({ scammers: '--', error: 'Bot waking up. Try again.' });
+        res.json({ scammers: 'loading...' });
     }
 });
 
