@@ -41,7 +41,10 @@ app.post('/api/chat', async (req, res) => {
     } catch (err) {
         clearTimeout(timeoutId);
         console.error('Error calling bot API:', err.message);
-       
+        
+        // Friendly message when bot is waking up or unavailable
+        res.status(503).json({ 
+            response: `⚠️ *Bot is waking up...*\n\nOur scam detector runs on a free server. The first request takes **30-50 seconds** to wake up.\n\n🔄 Please wait a moment and try again.\n\n📱 *Or use our Telegram bot instantly:*\n@JoshuaGiwaBot\n\nThank you for your patience! 🇳🇬`
         });
     }
 });
