@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Your bot's API gateway
-const BOT_API_URL = process.env.BOT_API_URL || 'https://scam-detection-vcn3.onrender.com/api/chat';
+const BOT_API_URL = process.env.BOT_API_URL || 'https://scam-detection-vcn3.onrender.com/api/test';
 
 // Middleware
 app.use(express.json());
