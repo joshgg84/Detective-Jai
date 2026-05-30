@@ -1,5 +1,4 @@
 // server.js - Detective Jai Web Service
-// Your bot is always online (UptimeRobot keeps it alive)
 
 const express = require('express');
 const path = require('path');
@@ -7,8 +6,8 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Your bot's API gateway
-const BOT_API_URL = process.env.BOT_API_URL || 'https://scam-detection-vcn3.onrender.com/api/test';
+// ✅ CORRECT URL - Your actual bot URL
+const BOT_API_URL = process.env.BOT_API_URL || 'https://scam-detection-vcn3.onrender.com/api/chat';
 
 // Middleware
 app.use(express.json());
@@ -34,7 +33,6 @@ app.post('/api/chat', async (req, res) => {
         
     } catch (err) {
         console.error('Error calling bot API:', err.message);
-        // Simple error message - bot should be online
         res.status(503).json({ 
             response: `⚠️ *Bot service temporarily unavailable*\n\nPlease try again in a moment or use our Telegram bot directly: @JoshuaGiwaBot`
         });
@@ -53,7 +51,7 @@ app.get('/health', (req, res) => {
 // ========== STATS PROXY ==========
 app.get('/api/stats', async (req, res) => {
     try {
-        const response = await fetch('https://scam-detection.onrender.com/api/stats');
+        const response = await fetch('https://scam-detection-vcn3.onrender.com/api/stats');
         const data = await response.json();
         res.json(data);
     } catch (err) {
