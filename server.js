@@ -15,7 +15,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ========== API PROXY ==========
-// Forward all chat requests to your bot's API gateway
 app.post('/api/chat', async (req, res) => {
     const { message, userId } = req.body;
     
@@ -23,21 +22,26 @@ app.post('/api/chat', async (req, res) => {
         return res.status(400).json({ error: 'Message is required' });
     }
     
+    // Set timeout for Render free tier (can take 30-50 seconds to wake up)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 70000);
+    
     try {
         const response = await fetch(BOT_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, userId: userId || 'web_user' })
+            body: JSON.stringify({ message, userId: userId || 'web_user' }),
+            signal: controller.signal
         });
         
+        clearTimeout(timeoutId);
         const data = await response.json();
         res.json(data);
         
     } catch (err) {
+        clearTimeout(timeoutId);
         console.error('Error calling bot API:', err.message);
-        res.status(503).json({ 
-            error: 'Bot service unavailable. Please try again or use our Telegram bot.',
-            telegram: 'https://t.me/Det_jai_bot'
+       
         });
     }
 });
@@ -58,12 +62,11 @@ app.get('/api/stats', async (req, res) => {
         const data = await response.json();
         res.json(data);
     } catch (err) {
-        res.json({ scammers: '--', error: 'Unable to fetch' });
+        res.json({ scammers: '--', error: 'Bot waking up. Try again.' });
     }
 });
 
 // ========== SPA FALLBACK ==========
-// Send index.html for all other routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
