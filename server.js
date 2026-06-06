@@ -1,19 +1,32 @@
-// server.js - Detective Jai Web Service
+// server.js - API Gateway + Website Server (No Telegram Bot)
 
 const express = require('express');
+const cors = require('cors');
 const path = require('path');
+
+const handlers = require('./handlers.js');
+const partnerSystem = require('./partner.js');
+const { getScammerCount } = require('./scammers.js');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ CORRECT URL - Your actual bot URL
-const BOT_API_URL = process.env.BOT_API_URL || 'https://scam-detection-vcn3.onrender.com/api/chat';
-
-// Middleware
+// Enable CORS
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type']
+}));
 app.use(express.json());
+
+// Serve static website files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ========== API PROXY ==========
+// Initialize partner system
+partnerSystem.initPartnerSystem();
+
+// ========== API ENDPOINTS ==========
+
 app.post('/api/chat', async (req, res) => {
     const { message, userId } = req.body;
     
@@ -21,54 +34,40 @@ app.post('/api/chat', async (req, res) => {
         return res.status(400).json({ error: 'Message is required' });
     }
     
+    console.log(`📨 API: ${message.substring(0, 50)}...`);
+    
     try {
-        const response = await fetch(BOT_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, userId: userId || 'web_user' })
-        });
-        
-        const data = await response.json();
-        res.json(data);
-        
+        const response = await handlers.processCommand(message, userId || 'web_user');
+        res.json({ success: true, response: response });
     } catch (err) {
-        console.error('Error calling bot API:', err.message);
-        res.status(503).json({ 
-            response: `⚠️ *Bot service temporarily unavailable*\n\nPlease try again in a moment or use our Telegram bot directly: @JoshuaGiwaBot`
-        });
+        console.error('API error:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-// ========== HEALTH CHECK ==========
 app.get('/health', (req, res) => {
     res.json({ 
         status: 'ok', 
-        timestamp: new Date().toISOString(),
-        service: 'Detective Jai Web'
+        timestamp: new Date().toISOString(), 
+        scammers: getScammerCount()
     });
 });
 
-// ========== STATS PROXY ==========
-app.get('/api/stats', async (req, res) => {
-    try {
-        const response = await fetch('https://scam-detection-vcn3.onrender.com/api/stats');
-        const data = await response.json();
-        res.json(data);
-    } catch (err) {
-        res.json({ scammers: 'loading...' });
-    }
+app.get('/api/stats', (req, res) => {
+    res.json({ scammers: getScammerCount() });
 });
 
-// ========== SPA FALLBACK ==========
-app.get('*', (req, res) => {
+app.get('/api/test', (req, res) => {
+    res.json({ status: 'ok', message: 'API is online' });
+});
+
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ========== START SERVER ==========
 app.listen(PORT, () => {
     console.log('========================================');
-    console.log('🕵️ Detective Jai Web Service');
+    console.log('🌐 Detective Jai API Running!');
     console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`📡 Bot API: ${BOT_API_URL}`);
     console.log('========================================');
 });
