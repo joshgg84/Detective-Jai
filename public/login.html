@@ -46,12 +46,12 @@
                     <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="checkbox" style="display: flex; align-items: center; gap: 8px;">
                             <input type="checkbox" id="remember">
-                            <label for="remember" style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0;">Remember me</label>
+                            <label for="remember" style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0; cursor: pointer;">Remember me</label>
                         </div>
                         <a href="#" style="color: #a78bfa; font-size: 0.8rem; text-decoration: none;">Forgot password?</a>
                     </div>
 
-                    <button type="submit" class="btn-primary btn-full">Log In</button>
+                    <button type="submit" class="btn-primary btn-full" id="loginBtn">Log In</button>
                 </form>
 
                 <p class="auth-switch">
@@ -70,12 +70,17 @@
     </footer>
 
     <script>
-        function handleLogin(event) {
+        async function handleLogin(event) {
             event.preventDefault();
 
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const messageDiv = document.getElementById('loginMessage');
+            const submitBtn = document.getElementById('loginBtn');
+
+            // Clear previous message
+            messageDiv.textContent = '';
+            messageDiv.style.color = '';
 
             if (!email || !password) {
                 messageDiv.textContent = '❌ Please fill in all fields.';
@@ -83,15 +88,44 @@
                 return;
             }
 
-            messageDiv.textContent = '✅ Logging in...';
-            messageDiv.style.color = '#10b981';
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+            messageDiv.textContent = '⏳ Please wait...';
+            messageDiv.style.color = '#f59e0b';
 
-            // TODO: Send to backend
-            // fetch('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) })
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
 
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1500);
+                const data = await response.json();
+
+                if (data.success) {
+                    messageDiv.textContent = '✅ ' + data.message;
+                    messageDiv.style.color = '#10b981';
+
+                    // Store user info in localStorage
+                    localStorage.setItem('detectiveJaiUser', JSON.stringify(data.user));
+
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    messageDiv.textContent = '❌ ' + data.error;
+                    messageDiv.style.color = '#ef4444';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Log In';
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                messageDiv.textContent = '❌ Network error. Please try again.';
+                messageDiv.style.color = '#ef4444';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Log In';
+            }
         }
     </script>
 
@@ -167,6 +201,11 @@
             cursor: pointer;
             font-size: 1rem;
             padding: 14px;
+        }
+
+        .btn-full:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .auth-switch {
