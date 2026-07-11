@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Help - Detective Jai</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <div class="logo">
+                <span class="logo-emoji">🕵️</span>
+                <span class="logo-text">Detective Jai</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="chat.html">Chat</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="https://t.me/JoshuaGiwaBot" target="_blank" class="telegram-link">Telegram Bot</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="help-section">
+        <div class="container">
+            <h1 class="section-title">Help & FAQ</h1>
+            
+            <!-- Search Bar -->
+            <div class="help-search">
+                <input type="text" id="helpSearch" placeholder="Search for help..." onkeyup="filterHelp()">
+            </div>
+
+            <div class="help-list" id="helpList">
+                <!-- General -->
+                <div class="help-item">
+                    <h3>What is Detective Jai?</h3>
+                    <p>Detective Jai is a free AI-powered scam detection tool. It checks phone numbers, messages, and links for scam patterns. It is available on Telegram and on the web.</p>
+                </div>
+
+                <div class="help-item">
+                    <h3>Is Detective Jai free?</h3>
+                    <p>Yes. Forever. No sign-up required. No hidden fees. No ads on the tool itself.</p>
+                </div>
+
+                <div class="help-item">
+                    <h3>How do I use it?</h3>
+                    <p>Type commands like <code>/checknumber 08012345678</code> or paste a suspicious message. Detective Jai will analyze it instantly and tell you if it is a scam.</p>
+                </div>
+
+                <div class="help-item">
+                    <h3>Where can I use Detective Jai?</h3>
+                    <p>On Telegram (<a href="https://t.me/JoshuaGiwaBot" target="_blank">@JoshuaGiwaBot</a>), on this website, and soon on WhatsApp and USSD.</p>
+                </div>
+
+                <!-- Reporting -->
+                <div class="help-item">
+                    <h3>How do I report a scammer?</h3>
+                    <p>Use the <code>/report</code> command with the number and reason. For example: <code>/report 08012345678 fake loan scam</code>. Your report helps protect others.</p>
+                </div>
+
+                <div class="help-item">
+                    <h3>What happens after I report a scammer?</h3>
+                    <p>The number is added to our scammer database. It will be flagged when other users check it. T.R.I. may investigate the report.</p>
+                </div>
+
+                <div class="help-item">
+                    <h3>What if my number was wrongly reported?</h3>
+                    <p>Use the <code>/plea</code> command. Example: <code>/plea 08012345678 I am a legitimate business</code>. Your case will be reviewed.</p>
+                </div>
+
+                <!-- Privacy & Safety -->
+                <div class="help-item">
+                    <h3>Is my data safe?</h3>
+                    <p>Yes. We do not collect or store your personal information. Your reports are anonymous. We do not share your data with anyone.</p>
+                </div>
+
+                <div class="help-item">
+                    <h3>What if I have already been scammed?</h3>
+                    <p>Stop sending money immediately. Report the number to Detective Jai using <code>/report</code>. Contact your bank. Report to the police. You are not alone.</p>
+                </div>
+
+                <!-- Languages -->
+                <div class="help-item">
+                    <h3>What languages does Detective Jai support?</h3>
+                    <p>English for now. Pidgin, Hausa, Yoruba, Igbo, Fulfulde, Ijaw, Tiv, Kanuri, and more coming.</p>
+                </div>
+
+                <!-- Commands -->
+                <div class="help-item">
+                    <h3>What commands can I use?</h3>
+                    <p>
+                        <code>/checknumber 08012345678</code> — Check a phone number<br>
+                        <code>/checkmsg [message]</code> — Analyze a message<br>
+                        <code>/checklink [url]</code> — Check a link<br>
+                        <code>/report [number] [reason]</code> — Report a scammer<br>
+                        <code>/plea [number] [reason]</code> — Appeal a false report<br>
+                        <code>/help</code> — Show all commands
+                    </p>
+                </div>
+
+                <!-- T.R.I. & CivicVoice -->
+                <div class="help-item">
+                    <h3>What is T.R.I.?</h3>
+                    <p>T.R.I. (Top Rank Investigations) is a security agency that investigates reports submitted through Detective Jai and CivicVoice.</p>
+                </div>
+
+                <div class="help-item">
+                    <h3>What is CivicVoice?</h3>
+                    <p>CivicVoice is a platform where citizens can report structural flaws, road issues, and community concerns. Detective Jai integrates with CivicVoice for infrastructure reports.</p>
+                </div>
+
+                <!-- Support -->
+                <div class="help-item">
+                    <h3>How can I contact support?</h3>
+                    <p>Visit our <a href="contact.html">Contact Page</a>, reach out on Telegram <a href="https://t.me/JoshuaGiwaBot" target="_blank">@JoshuaGiwaBot</a>, or email <a href="mailto:joshua@detective-jai.com">joshua@detective-jai.com</a>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 Detective Jai | Protecting Nigerians from scams</p>
+        </div>
+    </footer>
+
+    <script>
+        function filterHelp() {
+            const input = document.getElementById('helpSearch');
+            const filter = input.value.toLowerCase();
+            const items = document.querySelectorAll('.help-item');
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(filter) ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
