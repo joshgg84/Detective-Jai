@@ -56,12 +56,14 @@ body {
     display: flex;
     gap: 24px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .nav-links a {
     color: #cbd5e1;
     text-decoration: none;
     transition: color 0.2s;
+    font-size: 0.9rem;
 }
 
 .nav-links a:hover {
@@ -77,6 +79,7 @@ body {
 
 .telegram-link:hover {
     background: #00aaff;
+    color: white !important;
 }
 
 /* Hero Section */
@@ -164,6 +167,7 @@ body {
 .hero-stats {
     display: flex;
     gap: 40px;
+    flex-wrap: wrap;
 }
 
 .stat {
@@ -539,6 +543,160 @@ body {
     transform: scale(1.05);
 }
 
+/* Help Page */
+.help-section {
+    padding: 60px 0 80px;
+}
+
+.help-list {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.help-item {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 20px 24px;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.2s;
+}
+/* Help Search */
+.help-search {
+    max-width: 600px;
+    margin: 0 auto 40px;
+}
+
+.help-search input {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.help-search input::placeholder {
+    color: #94a3b8;
+}
+
+.help-search input:focus {
+    border-color: #667eea;
+}
+
+.help-item:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.help-item h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #a78bfa;
+}
+
+.help-item p {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.help-item code {
+    background: rgba(0,0,0,0.4);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+/* Privacy Page */
+.privacy-section {
+    padding: 60px 0 80px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.privacy-section h1 {
+    margin-bottom: 8px;
+}
+
+.privacy-section h2 {
+    font-size: 1.3rem;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    color: #a78bfa;
+}
+
+.privacy-section p {
+    color: #cbd5e1;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.privacy-section a {
+    color: #a78bfa;
+    text-decoration: none;
+}
+
+.privacy-section a:hover {
+    text-decoration: underline;
+}
+
+/* Contact Page */
+.contact-section {
+    padding: 60px 0 80px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.contact-section p {
+    color: #cbd5e1;
+    margin-bottom: 40px;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: left;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.05);
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.contact-item span:first-child {
+    font-size: 1.8rem;
+    min-width: 40px;
+}
+
+.contact-item p {
+    margin: 0;
+    color: #f1f5f9;
+}
+
+.contact-item a {
+    color: #a78bfa;
+    text-decoration: none;
+}
+
+.contact-item a:hover {
+    text-decoration: underline;
+}
+
 /* Footer */
 .footer {
     padding: 40px 0;
@@ -602,5 +760,18 @@ body {
     
     .cta-section h2 {
         font-size: 1.5rem;
+    }
+
+    .nav {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .nav-links {
+        gap: 12px;
+    }
+    
+    .contact-info {
+        padding: 0 16px;
     }
 }
