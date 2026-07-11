@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Chat with Detective Jai</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <div class="logo">
+                <span class="logo-emoji">🕵️</span>
+                <span class="logo-text">Detective Jai</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="help.html">Help</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="https://t.me/JoshuaGiwaBot" target="_blank" class="telegram-link">Telegram Bot</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="chat-section">
+        <div class="container">
+            <h2 class="section-title">Chat with Detective Jai</h2>
+            <div class="chat-container">
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        <div class="message-content">
+                            👋 <strong>Hello! I'm Detective Jai.</strong><br><br>
+                            I help you detect scams before you lose money.<br><br>
+                            <strong>🔍 Try these commands:</strong><br>
+                            <code>/checknumber 08012345678</code><br>
+                            <code>/checkmsg URGENT: Your bank will be closed</code><br>
+                            <code>/checklink https://suspicious-site.com</code><br>
+                            <code>/report 08012345678 fake loan scam</code><br>
+                            <code>/help</code> - Show all commands<br><br>
+                            <em>Free. Fast. Anonymous.</em>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="chat-typing" id="chatTyping">
+                    <span></span><span></span><span></span>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="quickCommand('/checknumber 08012345678')">📞 Test Number</button>
+                        <button class="quick-btn" onclick="quickCommand('/checkmsg URGENT: Your bank account will be suspended')">📝 Test Message</button>
+                        <button class="quick-btn" onclick="quickCommand('/checklink https://fake-gtbank-verify.com')">🔗 Test Link</button>
+                        <button class="quick-btn" onclick="quickCommand('/help')">❓ Help</button>
+                        <button class="quick-btn" onclick="clearChat()">🗑️ Clear</button>
+                    </div>
+
+                    <!-- Input Wrapper -->
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="chatInput" placeholder="Type a command or suspicious message..." onkeypress="handleKeyPress(event)">
+                        <button onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 Detective Jai | Protecting Nigerians from scams</p>
+        </div>
+    </footer>
+
+    <script src="chat.js"></script>
+</body>
+</html>
