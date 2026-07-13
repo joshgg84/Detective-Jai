@@ -68,15 +68,6 @@
             transform: scale(1.05);
         }
 
-        .btn-secondary {
-            background: #334155;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #475569;
-        }
-
         .stats {
             display: flex;
             gap: 24px;
@@ -235,7 +226,6 @@
             <h1>🕵️ Admin <span>Dashboard</span></h1>
             <div class="admin-controls">
                 <button class="btn btn-primary" onclick="loadUsers()">🔄 Refresh</button>
-                <button class="btn btn-secondary" onclick="logout()">🚪 Logout</button>
             </div>
         </div>
 
@@ -272,7 +262,7 @@
     </div>
 
     <script>
-        // NO REDIRECT — Just password prompt
+        // NO REDIRECT. NO LOCALSTORAGE. JUST PASSWORD.
         let adminPassword = null;
 
         async function loadUsers() {
@@ -389,12 +379,6 @@
             } catch (err) {
                 alert('❌ Network error.');
             }
-        }
-
-        function logout() {
-            adminPassword = null;
-            localStorage.removeItem('detectiveJaiUser');
-            window.location.href = 'login.html';
         }
 
         // ============================================
