@@ -43,12 +43,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ============================================
-// EXPLICIT ROUTES — Define admin.html first!
+// EXPLICIT ROUTES — BEFORE static
 // ============================================
 
-// Admin page (must come before static)
+// Admin page
 app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Login page
+app.get('/login.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Home page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Serve static files from the 'public' folder
@@ -148,7 +158,7 @@ app.get('/api/user/:id', (req, res) => {
 });
 
 // ============================================
-// API ENDPOINTS (Chat & Stats)
+// API ENDPOINTS
 // ============================================
 
 app.get('/api/config', (req, res) => {
@@ -197,7 +207,7 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ============================================
-// ADMIN — VIEW ALL USERS (With Password Protection)
+// ADMIN API
 // ============================================
 
 app.get('/api/admin/users', (req, res) => {
@@ -242,11 +252,11 @@ app.delete('/api/admin/users/:id', (req, res) => {
 });
 
 // ============================================
-// 404 HANDLER
+// CATCH-ALL: Serve index.html for unknown routes
 // ============================================
 
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ============================================
