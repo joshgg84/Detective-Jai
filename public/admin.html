@@ -262,13 +262,14 @@
     </div>
 
     <script>
-        // NO REDIRECT. NO LOCALSTORAGE. JUST PASSWORD.
+        // Prompt for password on page load
         let adminPassword = null;
 
         async function loadUsers() {
             const tbody = document.getElementById('usersBody');
             const totalSpan = document.getElementById('totalUsers');
 
+            // If no password, prompt for it
             if (!adminPassword) {
                 adminPassword = prompt('🔐 Enter admin password:');
                 if (!adminPassword) {
@@ -323,6 +324,7 @@
                         </tr>
                     `).join('');
                 } else if (data.error === 'Invalid admin password') {
+                    // Password was wrong, clear it and try again
                     adminPassword = null;
                     tbody.innerHTML = `
                         <tr>
@@ -382,7 +384,7 @@
         }
 
         // ============================================
-        // LOAD ON PAGE LOAD — NO REDIRECT
+        // LOAD ON PAGE LOAD
         // ============================================
 
         loadUsers();
