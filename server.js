@@ -61,16 +61,16 @@ app.post('/api/signup', (req, res) => {
 
     // Validate
     if (!fullName || !email || !password) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Full name, email, and password are required.' 
+        return res.status(400).json({
+            success: false,
+            error: 'Full name, email, and password are required.'
         });
     }
 
     if (password.length < 6) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Password must be at least 6 characters.' 
+        return res.status(400).json({
+            success: false,
+            error: 'Password must be at least 6 characters.'
         });
     }
 
@@ -78,9 +78,9 @@ app.post('/api/signup', (req, res) => {
 
     // Check if email already exists
     if (users.find(u => u.email === email)) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Email already registered.' 
+        return res.status(400).json({
+            success: false,
+            error: 'Email already registered.'
         });
     }
 
@@ -109,9 +109,9 @@ app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Email and password are required.' 
+        return res.status(400).json({
+            success: false,
+            error: 'Email and password are required.'
         });
     }
 
@@ -119,9 +119,9 @@ app.post('/api/login', (req, res) => {
     const user = users.find(u => u.email === email && u.password === password);
 
     if (!user) {
-        return res.status(401).json({ 
-            success: false, 
-            error: 'Invalid email or password.' 
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid email or password.'
         });
     }
 
@@ -202,7 +202,58 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ============================================
-// 404 HANDLER (Optional but recommended)
+// ADMIN — VIEW ALL USERS (With Password Protection)
+// ============================================
+
+app.get('/api/admin/users', (req, res) => {
+    // Get password from query parameter
+    const password = req.query.password;
+
+    // Check against environment variable
+    if (password !== process.env.ADMIN_PASS) {
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid admin password'
+        });
+    }
+
+    const users = readUsers();
+    const safeUsers = users.map(user => ({
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone || 'Not provided',
+        createdAt: user.createdAt
+    }));
+
+    res.json({
+        success: true,
+        total: safeUsers.length,
+        users: safeUsers
+    });
+});
+
+// ============================================
+// ADMIN — DELETE USER
+// ============================================
+
+app.delete('/api/admin/users/:id', (req, res) => {
+    const userId = req.params.id;
+    let users = readUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+
+    if (userIndex === -1) {
+        return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    users.splice(userIndex, 1);
+    writeUsers(users);
+
+    res.json({ success: true, message: 'User deleted successfully' });
+});
+
+// ============================================
+// 404 HANDLER
 // ============================================
 
 app.use((req, res) => {
@@ -226,6 +277,7 @@ app.listen(PORT, () => {
     console.log(`   - Privacy: http://localhost:${PORT}/privacy.html`);
     console.log(`   - Sign Up: http://localhost:${PORT}/signup.html`);
     console.log(`   - Login: http://localhost:${PORT}/login.html`);
+    console.log(`   - Admin: http://localhost:${PORT}/admin.html`);
     console.log('========================================');
     console.log(`👥 Users: ${readUsers().length} registered`);
     console.log('========================================');
