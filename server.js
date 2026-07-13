@@ -42,8 +42,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ============================================
+// EXPLICIT ROUTES — Define admin.html first!
+// ============================================
+
+// Admin page (must come before static)
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Serve static files from the 'public' folder
-// This will serve admin.html, index.html, chat.html, etc.
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '1d',
     dotfiles: 'ignore'
@@ -231,6 +239,14 @@ app.delete('/api/admin/users/:id', (req, res) => {
     writeUsers(users);
 
     res.json({ success: true, message: 'User deleted successfully' });
+});
+
+// ============================================
+// 404 HANDLER
+// ============================================
+
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // ============================================
