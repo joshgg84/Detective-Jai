@@ -272,6 +272,7 @@
     </div>
 
     <script>
+        // NO REDIRECT — Just password prompt
         let adminPassword = null;
 
         async function loadUsers() {
@@ -389,8 +390,15 @@
                 alert('❌ Network error.');
             }
         }
+
+        function logout() {
+            adminPassword = null;
+            localStorage.removeItem('detectiveJaiUser');
+            window.location.href = 'login.html';
+        }
+
         // ============================================
-        // LOAD ON PAGE LOAD — NO USER CHECK
+        // LOAD ON PAGE LOAD — NO REDIRECT
         // ============================================
 
         loadUsers();
