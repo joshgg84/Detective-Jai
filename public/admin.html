@@ -420,19 +420,12 @@
 
         function logout() {
             adminPassword = null;
-            localStorage.removeItem('detectiveJaiUser');
             window.location.href = 'login.html';
         }
 
         // ============================================
         // LOAD ON PAGE LOAD
         // ============================================
-
-        // Check if logged in
-        const user = localStorage.getItem('detectiveJaiUser');
-        if (!user) {
-            window.location.href = 'login.html';
-        }
 
         loadUsers();
     </script>
