@@ -6,217 +6,41 @@
     <title>Admin - Detective Jai</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0f172a;
-            color: #f1f5f9;
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .admin-header h1 {
-            font-size: 1.8rem;
-        }
-
-        .admin-header h1 span {
-            color: #a78bfa;
-        }
-
-        .admin-controls {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: scale(1.05);
-        }
-
-        .stats {
-            display: flex;
-            gap: 24px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 20px 32px;
-            text-align: center;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .stat-card h3 {
-            font-size: 0.8rem;
-            color: #94a3b8;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-card span {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #a78bfa;
-        }
-
-        .table-container {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 20px;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
-        thead th {
-            text-align: left;
-            padding: 12px 16px;
-            color: #94a3b8;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        tbody td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            color: #cbd5e1;
-            font-size: 0.85rem;
-        }
-
-        tbody tr:hover {
-            background: rgba(255,255,255,0.03);
-        }
-
-        .user-id {
-            font-family: monospace;
-            font-size: 0.7rem;
-            color: #64748b;
-        }
-
-        .btn-delete {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: 600;
-            transition: background 0.2s;
-            font-family: inherit;
-        }
-
-        .btn-delete:hover {
-            background: #dc2626;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #94a3b8;
-        }
-
-        .empty-state h2 {
-            color: #475569;
-            margin-bottom: 8px;
-        }
-
-        .access-denied {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .access-denied h2 {
-            color: #ef4444;
-            margin-bottom: 12px;
-        }
-
-        .access-denied p {
-            color: #94a3b8;
-            margin-bottom: 20px;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #475569;
-            font-size: 0.8rem;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f1f5f9; min-height: 100vh; padding: 40px 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+        .admin-header h1 { font-size: 1.8rem; }
+        .admin-header h1 span { color: #a78bfa; }
+        .admin-controls { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; font-family: inherit; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: scale(1.05); }
+        .stats { display: flex; gap: 24px; margin-bottom: 32px; flex-wrap: wrap; }
+        .stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px 32px; text-align: center; flex: 1; min-width: 150px; }
+        .stat-card h3 { font-size: 0.8rem; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card span { font-size: 2.5rem; font-weight: 700; color: #a78bfa; }
+        .table-container { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        thead th { text-align: left; padding: 12px 16px; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        tbody td { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; font-size: 0.85rem; }
+        tbody tr:hover { background: rgba(255,255,255,0.03); }
+        .user-id { font-family: monospace; font-size: 0.7rem; color: #64748b; }
+        .btn-delete { background: #ef4444; color: white; border: none; padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.7rem; font-weight: 600; transition: background 0.2s; font-family: inherit; }
+        .btn-delete:hover { background: #dc2626; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+        .empty-state h2 { color: #475569; margin-bottom: 8px; }
+        .access-denied { text-align: center; padding: 60px 20px; }
+        .access-denied h2 { color: #ef4444; margin-bottom: 12px; }
+        .access-denied p { color: #94a3b8; margin-bottom: 20px; }
+        .footer { text-align: center; margin-top: 40px; color: #475569; font-size: 0.8rem; }
         @media (max-width: 768px) {
-            body {
-                padding: 20px 16px;
-            }
-
-            .admin-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .stats {
-                flex-direction: column;
-            }
-
-            .stat-card {
-                min-width: auto;
-            }
-
-            table {
-                font-size: 0.75rem;
-            }
-
-            thead th,
-            tbody td {
-                padding: 8px 10px;
-            }
+            body { padding: 20px 16px; }
+            .admin-header { flex-direction: column; align-items: flex-start; }
+            .stats { flex-direction: column; }
+            .stat-card { min-width: auto; }
+            table { font-size: 0.75rem; }
+            thead th, tbody td { padding: 8px 10px; }
         }
     </style>
 </head>
@@ -262,14 +86,12 @@
     </div>
 
     <script>
-        // Prompt for password on page load
         let adminPassword = null;
 
         async function loadUsers() {
             const tbody = document.getElementById('usersBody');
             const totalSpan = document.getElementById('totalUsers');
 
-            // If no password, prompt for it
             if (!adminPassword) {
                 adminPassword = prompt('🔐 Enter admin password:');
                 if (!adminPassword) {
@@ -291,7 +113,13 @@
             tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">⏳ Loading...</td></tr>`;
 
             try {
-                const response = await fetch(`/api/admin/users?password=${encodeURIComponent(adminPassword)}`);
+                // POST the password to /api/admin
+                const response = await fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: adminPassword })
+                });
+
                 const data = await response.json();
 
                 if (data.success) {
@@ -324,7 +152,6 @@
                         </tr>
                     `).join('');
                 } else if (data.error === 'Invalid admin password') {
-                    // Password was wrong, clear it and try again
                     adminPassword = null;
                     tbody.innerHTML = `
                         <tr>
@@ -382,10 +209,6 @@
                 alert('❌ Network error.');
             }
         }
-
-        // ============================================
-        // LOAD ON PAGE LOAD
-        // ============================================
 
         loadUsers();
     </script>
