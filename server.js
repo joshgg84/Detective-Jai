@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const DETECTION_API_URL = process.env.DETECTION_API_URL || 'https://scam-detection-vcn3.onrender.com';
 
 // ============================================
-// DATA STORAGE (JSON files)
+// DATA STORAGE
 // ============================================
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -43,6 +43,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the 'public' folder
+// This will serve admin.html, index.html, chat.html, etc.
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '1d',
     dotfiles: 'ignore'
@@ -230,14 +231,6 @@ app.delete('/api/admin/users/:id', (req, res) => {
     writeUsers(users);
 
     res.json({ success: true, message: 'User deleted successfully' });
-});
-
-// ============================================
-// 404 HANDLER
-// ============================================
-
-app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // ============================================
