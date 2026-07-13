@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const DETECTION_API_URL = process.env.DETECTION_API_URL || 'https://scam-detection-vcn3.onrender.com';
 
 // ============================================
-// DATA STORAGE
+// DATA STORAGE (JSON files)
 // ============================================
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -46,7 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 // EXPLICIT ROUTES — BEFORE static
 // ============================================
 
-// Admin page
+// Admin page (must come before static)
 app.get('/admin.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
@@ -158,7 +158,7 @@ app.get('/api/user/:id', (req, res) => {
 });
 
 // ============================================
-// API ENDPOINTS
+// API ENDPOINTS (Chat & Stats)
 // ============================================
 
 app.get('/api/config', (req, res) => {
@@ -207,11 +207,11 @@ app.post('/api/chat', async (req, res) => {
 });
 
 // ============================================
-// ADMIN API
+// ADMIN — POST PASSWORD (NEW)
 // ============================================
 
-app.get('/api/admin/users', (req, res) => {
-    const password = req.query.password;
+app.post('/api/admin', (req, res) => {
+    const { password } = req.body;
 
     if (password !== process.env.ADMIN_PASS) {
         return res.status(401).json({
@@ -236,6 +236,10 @@ app.get('/api/admin/users', (req, res) => {
     });
 });
 
+// ============================================
+// ADMIN — DELETE USER
+// ============================================
+
 app.delete('/api/admin/users/:id', (req, res) => {
     const userId = req.params.id;
     let users = readUsers();
@@ -252,11 +256,11 @@ app.delete('/api/admin/users/:id', (req, res) => {
 });
 
 // ============================================
-// CATCH-ALL: Serve index.html for unknown routes
+// 404 HANDLER
 // ============================================
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // ============================================
