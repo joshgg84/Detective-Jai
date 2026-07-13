@@ -68,15 +68,6 @@
             transform: scale(1.05);
         }
 
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
         .btn-secondary {
             background: #334155;
             color: white;
@@ -240,7 +231,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="admin-header">
             <h1>🕵️ Admin <span>Dashboard</span></h1>
             <div class="admin-controls">
@@ -249,7 +239,6 @@
             </div>
         </div>
 
-        <!-- Stats -->
         <div class="stats">
             <div class="stat-card">
                 <h3>Total Users</h3>
@@ -257,7 +246,6 @@
             </div>
         </div>
 
-        <!-- Table -->
         <div class="table-container">
             <table>
                 <thead>
@@ -285,10 +273,6 @@
 
     <script>
         let adminPassword = null;
-
-        // ============================================
-        // LOAD USERS
-        // ============================================
 
         async function loadUsers() {
             const tbody = document.getElementById('usersBody');
@@ -381,18 +365,10 @@
             }
         }
 
-        // ============================================
-        // RETRY PASSWORD
-        // ============================================
-
         function retryPassword() {
             adminPassword = null;
             loadUsers();
         }
-
-        // ============================================
-        // DELETE USER
-        // ============================================
 
         async function deleteUser(userId) {
             if (!confirm('⚠️ Delete this user permanently?')) return;
@@ -413,18 +389,8 @@
                 alert('❌ Network error.');
             }
         }
-
         // ============================================
-        // LOGOUT
-        // ============================================
-
-        function logout() {
-            adminPassword = null;
-            window.location.href = 'login.html';
-        }
-
-        // ============================================
-        // LOAD ON PAGE LOAD
+        // LOAD ON PAGE LOAD — NO USER CHECK
         // ============================================
 
         loadUsers();
