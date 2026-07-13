@@ -1,6 +1,4 @@
 // server.js - Detective Jai Full Backend
-// Serves website, handles authentication, and proxies chat to detection backend
-
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -12,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const DETECTION_API_URL = process.env.DETECTION_API_URL || 'https://scam-detection-vcn3.onrender.com';
 
 // ============================================
-// DATA STORAGE (JSON files)
+// DATA STORAGE
 // ============================================
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -20,7 +18,6 @@ if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
-// Initialize users file
 if (!fs.existsSync(USERS_FILE)) {
     fs.writeFileSync(USERS_FILE, JSON.stringify([]));
 }
@@ -55,7 +52,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
 // AUTHENTICATION ENDPOINTS
 // ============================================
 
-// ========== SIGNUP ==========
 app.post('/api/signup', (req, res) => {
     const { fullName, email, phone, password } = req.body;
 
@@ -101,7 +97,6 @@ app.post('/api/signup', (req, res) => {
     });
 });
 
-// ========== LOGIN ==========
 app.post('/api/login', (req, res) => {
     const { email, password } = req.body;
 
@@ -129,7 +124,6 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// ========== GET USER ==========
 app.get('/api/user/:id', (req, res) => {
     const users = readUsers();
     const user = users.find(u => u.id === req.params.id);
@@ -223,10 +217,6 @@ app.get('/api/admin/users', (req, res) => {
     });
 });
 
-// ============================================
-// ADMIN — DELETE USER
-// ============================================
-
 app.delete('/api/admin/users/:id', (req, res) => {
     const userId = req.params.id;
     let users = readUsers();
@@ -243,16 +233,19 @@ app.delete('/api/admin/users/:id', (req, res) => {
 });
 
 // ============================================
-// 404 HANDLER
+// CATCH-ALL ROUTE (Fixed)
 // ============================================
 
-app.use((req, res) => {
-    // Check if the request is for a file that exists
+app.get('*', (req, res) => {
     const filePath = path.join(__dirname, 'public', req.path);
+
+    // Check if the file exists
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         return res.sendFile(filePath);
     }
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+
+    // If not, send index.html or 404
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ============================================
