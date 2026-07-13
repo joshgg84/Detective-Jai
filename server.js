@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 const DETECTION_API_URL = process.env.DETECTION_API_URL || 'https://scam-detection-vcn3.onrender.com';
 
 // ============================================
-// DATA STORAGE
+// DATA STORAGE (JSON files)
 // ============================================
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -233,19 +233,11 @@ app.delete('/api/admin/users/:id', (req, res) => {
 });
 
 // ============================================
-// CATCH-ALL ROUTE (Fixed)
+// 404 HANDLER
 // ============================================
 
-app.get('*', (req, res) => {
-    const filePath = path.join(__dirname, 'public', req.path);
-
-    // Check if the file exists
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-        return res.sendFile(filePath);
-    }
-
-    // If not, send index.html or 404
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 // ============================================
