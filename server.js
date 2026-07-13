@@ -59,7 +59,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
 app.post('/api/signup', (req, res) => {
     const { fullName, email, phone, password } = req.body;
 
-    // Validate
     if (!fullName || !email || !password) {
         return res.status(400).json({
             success: false,
@@ -76,7 +75,6 @@ app.post('/api/signup', (req, res) => {
 
     const users = readUsers();
 
-    // Check if email already exists
     if (users.find(u => u.email === email)) {
         return res.status(400).json({
             success: false,
@@ -84,13 +82,12 @@ app.post('/api/signup', (req, res) => {
         });
     }
 
-    // Create new user
     const newUser = {
         id: Date.now().toString(),
         fullName,
         email,
         phone: phone || '',
-        password, // TODO: Hash password with bcrypt
+        password,
         createdAt: new Date().toISOString()
     };
 
@@ -125,8 +122,6 @@ app.post('/api/login', (req, res) => {
         });
     }
 
-    // TODO: Generate JWT token for session
-
     res.json({
         success: true,
         message: 'Login successful!',
@@ -153,14 +148,12 @@ app.get('/api/user/:id', (req, res) => {
 // API ENDPOINTS (Chat & Stats)
 // ============================================
 
-// ========== CONFIG ==========
 app.get('/api/config', (req, res) => {
     res.json({
         botApiUrl: `${DETECTION_API_URL}/api/chat`
     });
 });
 
-// ========== STATS ==========
 app.get('/api/stats', async (req, res) => {
     try {
         const response = await axios.get(`${DETECTION_API_URL}/api/stats`, { timeout: 5000 });
@@ -171,7 +164,6 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
-// ========== CHAT PROXY ==========
 app.post('/api/chat', async (req, res) => {
     try {
         const response = await axios.post(`${DETECTION_API_URL}/api/chat`, req.body, {
@@ -206,10 +198,8 @@ app.post('/api/chat', async (req, res) => {
 // ============================================
 
 app.get('/api/admin/users', (req, res) => {
-    // Get password from query parameter
     const password = req.query.password;
 
-    // Check against environment variable
     if (password !== process.env.ADMIN_PASS) {
         return res.status(401).json({
             success: false,
@@ -257,6 +247,11 @@ app.delete('/api/admin/users/:id', (req, res) => {
 // ============================================
 
 app.use((req, res) => {
+    // Check if the request is for a file that exists
+    const filePath = path.join(__dirname, 'public', req.path);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        return res.sendFile(filePath);
+    }
     res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
