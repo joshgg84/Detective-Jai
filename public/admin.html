@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Detective Jai</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <div class="logo">
+                <span class="logo-emoji">🕵️</span>
+                <span class="logo-text">Detective Jai</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="chat.html">Chat</a>
+                <a href="help.html">Help</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="logout.html">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="admin-section">
+        <div class="container">
+            <h1 class="section-title">Admin Dashboard</h1>
+            <p style="text-align: center; color: #94a3b8; margin-bottom: 32px;">Manage registered users</p>
+
+            <div class="admin-stats" id="adminStats">
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <span id="totalUsers">--</span>
+                </div>
+            </div>
+
+            <div class="admin-controls">
+                <button onclick="refreshUsers()" class="btn-primary">Refresh</button>
+                <button onclick="logout()" class="btn-secondary">Logout</button>
+            </div>
+
+            <div class="table-container">
+                <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Created At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 Detective Jai | Admin Panel</p>
+        </div>
+    </footer>
+
+    <style>
+        .admin-section {
+            padding: 40px 0 60px;
+        }
+
+        .admin-stats {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .stat-card span {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #a78bfa;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .table-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 12px 16px;
+            color: #94a3b8;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-weight: 600;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #cbd5e1;
+        }
+
+        tbody tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        .btn-refresh {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+
+        .btn-logout {
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
+    </style>
+
+    <script>
+        // ============================================
+        // ADMIN — LOAD USERS
+        // ============================================
+
+        async function loadUsers() {
+            const tbody = document.getElementById('usersBody');
+            const totalSpan = document.getElementById('totalUsers');
+
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">Loading...</td></tr>`;
+
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+
+                if (data.success) {
+                    totalSpan.textContent = data.total;
+
+                    if (data.users.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #94a3b8;">No users found.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = data.users.map(user => `
+                        <tr>
+                            <td><code>${user.id}</code></td>
+                            <td>${user.fullName}</td>
+                            <td>${user.email}</td>
+                            <td>${user.phone}</td>
+                            <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteUser('${user.id}')">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #ef4444;">Failed to load users.</td></tr>`;
+                }
+            } catch (err) {
+                console.error('Admin error:', err);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 40px; color: #ef4444;">Network error. Please try again.</td></tr>`;
+            }
+        }
+
+        // ============================================
+        // ADMIN — DELETE USER
+        // ============================================
+
+        async function deleteUser(userId) {
+            if (!confirm('Are you sure you want to delete this user?')) return;
+
+            try {
+                const response = await fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('User deleted successfully.');
+                    loadUsers();
+                } else {
+                    alert('Failed to delete user: ' + data.error);
+                }
+            } catch (err) {
+                console.error('Delete error:', err);
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // ============================================
+        // ADMIN — REFRESH
+        // ============================================
+
+        function refreshUsers() {
+            loadUsers();
+        }
+
+        // ============================================
+        // ADMIN — LOGOUT
+        // ============================================
+
+        function logout() {
+            localStorage.removeItem('detectiveJaiUser');
+            window.location.href = 'login.html';
+        }
+
+        // ============================================
+        // LOAD ON PAGE LOAD
+        // ============================================
+
+        // Check if user is logged in (simple check)
+        const user = localStorage.getItem('detectiveJaiUser');
+        if (!user) {
+            window.location.href = 'login.html';
+        }
+
+        loadUsers();
+    </script>
+</body>
+</html>
