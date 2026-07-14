@@ -256,6 +256,39 @@ app.delete('/ddds/keys/:index', (req, res) => {
 });
 
 // ============================================
+// 🔑 GET API KEY FOR FRONTEND (NEW ENDPOINT)
+// ============================================
+
+app.get('/api/key', (req, res) => {
+    // Get the first valid API key from storage
+    const keys = readApiKeys();
+    
+    // Option 1: Return the first key if it exists
+    if (keys.length > 0) {
+        // You might want to return only the first key or a specific one
+        // For security, you could also return a masked version
+        res.json({
+            success: true,
+            apiKey: keys[0] // Returns the first API key
+        });
+    } else {
+        // Option 2: Return a default key from environment variable
+        const defaultKey = process.env.DEFAULT_API_KEY;
+        if (defaultKey) {
+            res.json({
+                success: true,
+                apiKey: defaultKey
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: 'No API keys available. Generate one first at /ddds/generate'
+            });
+        }
+    }
+});
+
+// ============================================
 // 🔐 CHAT API — Protected with API Key
 // ============================================
 
@@ -509,7 +542,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
     console.log('========================================');
     console.log('🕵️ Detective Jai Full Backend');
-    console.log(`📍 URL: https://detective-jai.onrender.com:${PORT}`);
+    console.log(`📍 URL: http://localhost:${PORT}`);
     console.log(`📡 Detection API: ${DETECTION_API_URL}`);
     console.log('📄 Pages:');
     console.log(`   - Home: http://localhost:${PORT}/`);
