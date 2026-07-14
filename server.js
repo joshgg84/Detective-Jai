@@ -11,26 +11,43 @@ const PORT = process.env.PORT || 3000;
 const DETECTION_API_URL = process.env.DETECTION_API_URL || 'https://scam-detection-vcn3.onrender.com';
 
 // ============================================
+// 📁 ENSURE DATA DIRECTORY EXISTS
+// ============================================
+
+const DATA_DIR = path.join(__dirname, 'data');
+if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    console.log('📁 Created data directory');
+}
+
+// ============================================
 // 📋 API KEY STORAGE (JSON file)
 // ============================================
 
-const KEYS_FILE = path.join(__dirname, 'data', 'api_keys.json');
+const KEYS_FILE = path.join(DATA_DIR, 'api_keys.json');
 
 // Initialize keys file if it doesn't exist
 if (!fs.existsSync(KEYS_FILE)) {
     fs.writeFileSync(KEYS_FILE, JSON.stringify([]));
+    console.log('📄 Created api_keys.json');
 }
 
 function readApiKeys() {
     try {
-        return JSON.parse(fs.readFileSync(KEYS_FILE));
-    } catch {
+        const data = fs.readFileSync(KEYS_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (err) {
+        console.error('Error reading API keys:', err);
         return [];
     }
 }
 
 function writeApiKeys(keys) {
-    fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2));
+    try {
+        fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2));
+    } catch (err) {
+        console.error('Error writing API keys:', err);
+    }
 }
 
 function isValidApiKey(key) {
@@ -47,25 +64,29 @@ function generateApiKey() {
 // DATA STORAGE (Users)
 // ============================================
 
-const DATA_DIR = path.join(__dirname, 'data');
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 if (!fs.existsSync(USERS_FILE)) {
     fs.writeFileSync(USERS_FILE, JSON.stringify([]));
+    console.log('📄 Created users.json');
 }
 
 function readUsers() {
     try {
-        return JSON.parse(fs.readFileSync(USERS_FILE));
-    } catch {
+        const data = fs.readFileSync(USERS_FILE, 'utf8');
+        return JSON.parse(data);
+    } catch (err) {
+        console.error('Error reading users:', err);
         return [];
     }
 }
 
 function writeUsers(users) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    try {
+        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    } catch (err) {
+        console.error('Error writing users:', err);
+    }
 }
 
 // ============================================
@@ -116,7 +137,7 @@ app.post('/ddds/generate', (req, res) => {
     const { secret } = req.body;
 
     // Secret check - only authorized users can generate keys
-    const GENERATION_SECRET = process.env.GENERATION_SECRET;
+    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
     
     if (!secret || secret !== GENERATION_SECRET) {
         return res.status(401).json({
@@ -460,7 +481,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
     console.log('========================================');
     console.log('🕵️ Detective Jai Full Backend');
-    console.log(`📍 URL: http://localhost:${PORT}`);
+    console.log(`📍 URL: http://https://detective-jai.onrender.com:${PORT}`);
     console.log(`📡 Detection API: ${DETECTION_API_URL}`);
     console.log('📄 Pages:');
     console.log(`   - Home: http://localhost:${PORT}/`);
