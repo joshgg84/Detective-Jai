@@ -1,15 +1,11 @@
 // chat.js - Detective Jai Web Chat
-// API key is provided by the developer/admin
 
 // ============================================
 // CONFIGURATION
 // ============================================
 
 const API_URL = '/api/chat';
-
-// The developer must set this manually or through a secure process
-// This can be loaded from a server-side config or environment variable
-let API_KEY = ''; // Will be set by the developer
+let API_KEY = '';
 
 // ============================================
 // DOM ELEMENTS
@@ -20,16 +16,44 @@ const chatInput = document.getElementById('chatInput');
 const chatTyping = document.getElementById('chatTyping');
 
 // ============================================
-// SET API KEY (Called by developer/admin)
+// SET API KEY (Auto-fetch from server)
 // ============================================
 
-function setApiKey(key) {
-    API_KEY = key;
-    console.log('✅ API Key set');
+async function setApiKey() {
+    try {
+        const response = await fetch('/api/key');
+        const data = await response.json();
+        
+        if (data.success && data.apiKey) {
+            API_KEY = data.apiKey;
+            console.log('✅ API Key set successfully!');
+        } else {
+            console.error('❌ No API key available:', data.error);
+            addMessage('⚠️ No API key available. Please generate one at /ddds/generate', 'bot');
+        }
+    } catch (err) {
+        console.error('Failed to fetch API key:', err);
+        addMessage('⚠️ Could not load API key. Please refresh or contact admin.', 'bot');
+    }
 }
 
-// For development, you can set it here (but better to get it from server)
-// The developer would call this function with the key
+// Call the function when page loads
+setApiKey();
+
+// ============================================
+// FUNCTION TO SET API KEY MANUALLY (for debugging)
+// ============================================
+
+function setApiKeyManually(key) {
+    if (key && key.length > 0) {
+        API_KEY = key;
+        console.log('✅ API Key set manually!');
+        return true;
+    } else {
+        console.error('❌ Invalid API key');
+        return false;
+    }
+}
 
 // ============================================
 // SEND MESSAGE
@@ -39,9 +63,8 @@ async function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
 
-    // Check if API key is set
     if (!API_KEY) {
-        addMessage('⚠️ API key not set. Please contact the administrator.', 'bot');
+        addMessage('⚠️ API key not set. Please wait or contact administrator.', 'bot');
         return;
     }
 
@@ -78,8 +101,6 @@ async function sendMessage() {
         addMessage('⚠️ Connection error. Please try again.', 'bot');
     }
 }
-
-setApiKey(process.env.API_KEY);
 
 // ============================================
 // QUICK COMMAND
@@ -133,5 +154,4 @@ function handleKeyPress(event) {
 
 chatInput.focus();
 
-// The developer must set the API key
-// Example: setApiKey('generated-key-from-ddds');
+console.log('💡 To set API key manually, type: setApiKeyManually("your-key-here")');
