@@ -272,7 +272,6 @@ app.get('/api/key', (req, res) => {
                 error: 'No API keys available. Generate one first at /ddds/generate'
             });
         }
-    }
 });
 
 // ============================================
