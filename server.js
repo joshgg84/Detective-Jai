@@ -1,10 +1,9 @@
-// server.js - Detective Jai Full Backend
+// server.js - Detective Jai Full Backend (No API Keys)
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
 const fs = require('fs');
-const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,46 +17,6 @@ const DATA_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
     console.log('📁 Created data directory');
-}
-
-// ============================================
-// 📋 API KEY STORAGE (JSON file)
-// ============================================
-
-const KEYS_FILE = path.join(DATA_DIR, 'api_keys.json');
-
-// Initialize keys file if it doesn't exist
-if (!fs.existsSync(KEYS_FILE)) {
-    fs.writeFileSync(KEYS_FILE, JSON.stringify([]));
-    console.log('📄 Created api_keys.json');
-}
-
-function readApiKeys() {
-    try {
-        const data = fs.readFileSync(KEYS_FILE, 'utf8');
-        return JSON.parse(data);
-    } catch (err) {
-        console.error('Error reading API keys:', err);
-        return [];
-    }
-}
-
-function writeApiKeys(keys) {
-    try {
-        fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2));
-    } catch (err) {
-        console.error('Error writing API keys:', err);
-    }
-}
-
-function isValidApiKey(key) {
-    const keys = readApiKeys();
-    return keys.includes(key);
-}
-
-function generateApiKey() {
-    // Generate a random 32-character hex string
-    return crypto.randomBytes(32).toString('hex');
 }
 
 // ============================================
@@ -104,181 +63,10 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // ============================================
-// 🔐 API KEY AUTHENTICATION MIDDLEWARE
+// 💬 CHAT API — NO AUTHENTICATION REQUIRED
 // ============================================
 
-function authenticateApiKey(req, res, next) {
-    const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
-    
-    if (!apiKey) {
-        return res.status(401).json({
-            success: false,
-            error: 'API key required.',
-            code: 'MISSING_API_KEY'
-        });
-    }
-
-    if (!isValidApiKey(apiKey)) {
-        return res.status(403).json({
-            success: false,
-            error: 'Invalid API key.',
-            code: 'INVALID_API_KEY'
-        });
-    }
-
-    next();
-}
-
-// ============================================
-// 🔑 GENERATE API KEY ENDPOINT (GET & POST)
-// ============================================
-
-// GET endpoint - use query parameter
-app.get('/ddds/generate', (req, res) => {
-    const { secret } = req.query;
-    
-    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
-    
-    if (!secret || secret !== GENERATION_SECRET) {
-        return res.status(401).json({
-            success: false,
-            error: 'Invalid generation secret.'
-        });
-    }
-
-    const newKey = generateApiKey();
-    const keys = readApiKeys();
-    keys.push(newKey);
-    writeApiKeys(keys);
-
-    console.log(`🔑 New API key generated: ${newKey.substring(0, 8)}...`);
-
-    res.json({
-        success: true,
-        apiKey: newKey,
-        message: 'API key generated successfully.',
-        totalKeys: keys.length
-    });
-});
-
-// POST endpoint - use body parameter (for compatibility)
-app.post('/ddds/generate', (req, res) => {
-    const { secret } = req.body;
-    
-    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
-    
-    if (!secret || secret !== GENERATION_SECRET) {
-        return res.status(401).json({
-            success: false,
-            error: 'Invalid generation secret.'
-        });
-    }
-
-    const newKey = generateApiKey();
-    const keys = readApiKeys();
-    keys.push(newKey);
-    writeApiKeys(keys);
-
-    console.log(`🔑 New API key generated: ${newKey.substring(0, 8)}...`);
-
-    res.json({
-        success: true,
-        apiKey: newKey,
-        message: 'API key generated successfully.',
-        totalKeys: keys.length
-    });
-});
-
-// ============================================
-// 📋 LIST API KEYS ENDPOINT (Admin)
-// ============================================
-
-app.get('/ddds/keys', (req, res) => {
-    const { secret } = req.query;
-
-    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
-    
-    if (!secret || secret !== GENERATION_SECRET) {
-        return res.status(401).json({
-            success: false,
-            error: 'Invalid generation secret.'
-        });
-    }
-
-    const keys = readApiKeys();
-    // Only show first 8 characters for security
-    const maskedKeys = keys.map(key => ({
-        key: key.substring(0, 8) + '...',
-        full: key,
-        index: keys.indexOf(key)
-    }));
-
-    res.json({
-        success: true,
-        total: keys.length,
-        keys: maskedKeys
-    });
-});
-
-// ============================================
-// 🗑️ REVOKE API KEY ENDPOINT (Admin)
-// ============================================
-
-app.delete('/ddds/keys/:index', (req, res) => {
-    const { secret } = req.body;
-    const index = parseInt(req.params.index);
-
-    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
-    
-    if (!secret || secret !== GENERATION_SECRET) {
-        return res.status(401).json({
-            success: false,
-            error: 'Invalid generation secret.'
-        });
-    }
-
-    const keys = readApiKeys();
-    if (index < 0 || index >= keys.length) {
-        return res.status(404).json({
-            success: false,
-            error: 'Key not found.'
-        });
-    }
-
-    const removed = keys.splice(index, 1);
-    writeApiKeys(keys);
-
-    res.json({
-        success: true,
-        message: `Key ${removed[0].substring(0, 8)}... revoked successfully.`,
-        totalKeys: keys.length
-    });
-});
-
-// ============================================
-// 🔑 GET API KEY FOR FRONTEND (NEW ENDPOINT)
-// ============================================
-
-app.get('/api/key', (req, res) => {
-        const defaultKey = process.env.API_KEY;
-        if (defaultKey) {
-            res.json({
-                success: true,
-                apiKey: defaultKey
-            });
-        } else {
-            res.status(404).json({
-                success: false,
-                error: 'No API keys available. Generate one first at /ddds/generate'
-            });
-        }
-});
-
-// ============================================
-// 🔐 CHAT API — Protected with API Key
-// ============================================
-
-app.post('/api/chat', authenticateApiKey, async (req, res) => {
+app.post('/api/chat', async (req, res) => {
     const { message, userId } = req.body;
     
     if (!message) {
@@ -356,11 +144,9 @@ function getFallbackResponse(message) {
 // ============================================
 
 app.get('/api/config', (req, res) => {
-    // This endpoint doesn't return the API key anymore
-    // The frontend gets the key from the admin/developer
     res.json({
         botApiUrl: '/api/chat',
-        requiresApiKey: true
+        requiresApiKey: false
     });
 });
 
@@ -540,7 +326,6 @@ app.listen(PORT, () => {
     console.log(`   - Login: http://localhost:${PORT}/login.html`);
     console.log(`   - Admin: http://localhost:${PORT}/admin.html`);
     console.log('========================================');
-    console.log(`🔑 Total API Keys: ${readApiKeys().length}`);
     console.log(`👥 Users: ${readUsers().length} registered`);
     console.log('========================================');
 });
