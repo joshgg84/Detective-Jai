@@ -1,11 +1,10 @@
-// chat.js - Detective Jai Web Chat
+// chat.js - Detective Jai Web Chat (No API Keys)
 
 // ============================================
 // CONFIGURATION
 // ============================================
 
 const API_URL = '/api/chat';
-let API_KEY = '';
 
 // ============================================
 // DOM ELEMENTS
@@ -16,57 +15,12 @@ const chatInput = document.getElementById('chatInput');
 const chatTyping = document.getElementById('chatTyping');
 
 // ============================================
-// SET API KEY (Auto-fetch from server)
-// ============================================
-
-async function setApiKey() {
-    try {
-        const response = await fetch('/api/key');
-        const data = await response.json();
-        
-        if (data.success && data.apiKey) {
-            API_KEY = data.apiKey;
-            console.log('✅ API Key set successfully!');
-        } else {
-            console.error('❌ No API key available:', data.error);
-            addMessage('⚠️ No API key available. Please generate one at /ddds/generate', 'bot');
-        }
-    } catch (err) {
-        console.error('Failed to fetch API key:', err);
-        addMessage('⚠️ Could not load API key. Please refresh or contact admin.', 'bot');
-    }
-}
-
-// Call the function when page loads
-setApiKey();
-
-// ============================================
-// FUNCTION TO SET API KEY MANUALLY (for debugging)
-// ============================================
-
-function setApiKeyManually(key) {
-    if (key && key.length > 0) {
-        API_KEY = key;
-        console.log('✅ API Key set manually!');
-        return true;
-    } else {
-        console.error('❌ Invalid API key');
-        return false;
-    }
-}
-
-// ============================================
 // SEND MESSAGE
 // ============================================
 
 async function sendMessage() {
     const message = chatInput.value.trim();
     if (!message) return;
-
-    if (!API_KEY) {
-        addMessage('⚠️ API key not set. Please wait or contact administrator.', 'bot');
-        return;
-    }
 
     addMessage(message, 'user');
     chatInput.value = '';
@@ -76,8 +30,7 @@ async function sendMessage() {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': API_KEY
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 message: message,
@@ -153,5 +106,4 @@ function handleKeyPress(event) {
 // ============================================
 
 chatInput.focus();
-
-console.log('💡 To set API key manually, type: setApiKeyManually("your-key-here")');
+console.log('💬 Detective Jai Chat is ready!');
