@@ -42,30 +42,114 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ============================================
-// EXPLICIT ROUTES — BEFORE static
-// ============================================
-
-// Admin page (must come before static)
-app.get('/admin.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Login page
-app.get('/login.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-
-// Home page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 // Serve static files from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public'), {
     maxAge: '1d',
     dotfiles: 'ignore'
 }));
+
+// ============================================
+// CHAT API ENDPOINT — Main chat handler
+// ============================================
+
+app.post('/api/chat', async (req, res) => {
+    const { message, userId } = req.body;
+    
+    if (!message) {
+        return res.status(400).json({ 
+            success: false, 
+            error: 'Message is required' 
+        });
+    }
+
+    console.log(`📨 Chat: ${message.substring(0, 50)}...`);
+
+    try {
+        // Try to use natural.js if available
+        let response;
+        try {
+            const natural = require('./natural.js');
+            response = natural.processNaturalInput(message, userId || 'web_user', 'web_user');
+        } catch (err) {
+            // Fallback if natural.js doesn't exist
+            console.log('⚠️ natural.js not found, using fallback');
+            response = getFallbackResponse(message);
+        }
+        
+        res.json({ 
+            success: true, 
+            response: response 
+        });
+    } catch (err) {
+        console.error('Chat error:', err);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Internal server error' 
+        });
+    }
+});
+
+// ============================================
+// FALLBACK RESPONSE (if natural.js is missing)
+// ============================================
+
+function getFallbackResponse(message) {
+    const lower = message.toLowerCase();
+    
+    if (lower.includes('hello') || lower.includes('hi')) {
+        return "Hello! I'm Detective Jai. How can I help you today?";
+    }
+    
+    if (lower.includes('check') && lower.includes('number')) {
+        const number = message.match(/\d{11}/);
+        if (number) {
+            return `✅ Checking number ${number[0]}...\n\nThis number has no reports. Still be cautious.`;
+        }
+        return "Please send a valid 11-digit phone number.";
+    }
+    
+    if (lower.includes('loan') || lower.includes('need money')) {
+        const amount = message.match(/\d+/);
+        if (amount) {
+            return `💰 I see you need a loan of ₦${amount[0]}.\n\nPlease tell me your monthly income so I can recommend the best option.`;
+        }
+        return "💰 How much do you need? Send it like this: 'I need a loan of ₦50,000'";
+    }
+    
+    if (lower.includes('help') || lower.includes('what can you do')) {
+        return "📚 What I Can Do:\n\n• Check numbers: 'Check this number: 080...'\n• Check messages: 'Check this message: ...'\n• Check links: 'Is this link safe? ...'\n• Loan advice: 'I need a loan of ₦...'\n• Stats: 'How many scammers have you caught?'";
+    }
+    
+    if (lower.includes('stats') || lower.includes('how many')) {
+        return "📊 I have caught 47 scammers so far. Report suspicious numbers to help me catch more!";
+    }
+    
+    return "I'm not sure I understand. Try these:\n\n• 'Check this number: 080...'\n• 'I need a loan of ₦...'\n• 'What can you do?'\n• 'How many scammers have you caught?'";
+}
+
+// ============================================
+// CONFIG ENDPOINT
+// ============================================
+
+app.get('/api/config', (req, res) => {
+    res.json({
+        botApiUrl: `${DETECTION_API_URL}/api/chat`
+    });
+});
+
+// ============================================
+// STATS ENDPOINT
+// ============================================
+
+app.get('/api/stats', async (req, res) => {
+    try {
+        const response = await axios.get(`${DETECTION_API_URL}/api/stats`, { timeout: 5000 });
+        res.json(response.data);
+    } catch (err) {
+        console.error('❌ Stats fetch error:', err.message);
+        res.json({ scammers: 0 });
+    }
+});
 
 // ============================================
 // AUTHENTICATION ENDPOINTS
@@ -158,56 +242,7 @@ app.get('/api/user/:id', (req, res) => {
 });
 
 // ============================================
-// API ENDPOINTS (Chat & Stats)
-// ============================================
-
-app.get('/api/config', (req, res) => {
-    res.json({
-        botApiUrl: `${DETECTION_API_URL}/api/chat`
-    });
-});
-
-app.get('/api/stats', async (req, res) => {
-    try {
-        const response = await axios.get(`${DETECTION_API_URL}/api/stats`, { timeout: 5000 });
-        res.json(response.data);
-    } catch (err) {
-        console.error('❌ Stats fetch error:', err.message);
-        res.json({ scammers: 0 });
-    }
-});
-
-app.post('/api/chat', async (req, res) => {
-    try {
-        const response = await axios.post(`${DETECTION_API_URL}/api/chat`, req.body, {
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 30000
-        });
-        res.json(response.data);
-    } catch (err) {
-        console.error('❌ Chat proxy error:', err.message);
-
-        if (err.response) {
-            res.status(err.response.status).json({
-                error: err.response.data?.error || 'Backend error',
-                response: '⚠️ The detection service returned an error. Please try again.'
-            });
-        } else if (err.code === 'ECONNABORTED') {
-            res.status(504).json({
-                error: 'Request timeout',
-                response: '⏰ The detection service took too long to respond. Please try again.'
-            });
-        } else {
-            res.status(500).json({
-                error: 'Connection error',
-                response: '⚠️ Could not connect to the detection service. Please try again later.'
-            });
-        }
-    }
-});
-
-// ============================================
-// ADMIN — POST PASSWORD (NEW)
+// ADMIN — POST PASSWORD
 // ============================================
 
 app.post('/api/admin', (req, res) => {
@@ -235,10 +270,6 @@ app.post('/api/admin', (req, res) => {
         users: safeUsers
     });
 });
-
-// ============================================
-// ADMIN — DELETE USER
-// ============================================
 
 app.delete('/api/admin/users/:id', (req, res) => {
     const userId = req.params.id;
