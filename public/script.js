@@ -1,5 +1,5 @@
 // script.js - Detective Jai Web Interface
-// Works with the multi-page setup (index.html, chat.html, help.html, contact.html, privacy.html)
+// Updated for simple formatting from natural.js
 
 let BOT_API_URL = '/api/chat'; // fallback
 
@@ -24,7 +24,7 @@ async function loadConfig() {
 
 async function loadStats() {
     const statsElement = document.getElementById('scammerCount');
-    if (!statsElement) return; // Only run on pages that have the stats element
+    if (!statsElement) return;
 
     try {
         const response = await fetch('/api/stats');
@@ -39,7 +39,7 @@ async function loadStats() {
 }
 
 // ============================================
-// CHAT FUNCTIONS (Only run on chat page)
+// CHAT FUNCTIONS
 // ============================================
 
 function isChatPage() {
@@ -48,7 +48,7 @@ function isChatPage() {
 
 async function sendMessage() {
     const input = document.getElementById('chatInput');
-    if (!input) return; // Only run on chat page
+    if (!input) return;
 
     const message = input.value.trim();
     if (!message) return;
@@ -68,7 +68,8 @@ async function sendMessage() {
         showTyping(false);
 
         if (data.response) {
-            addMessage(data.response, 'bot');
+            // Simple formatting - just display as plain text with line breaks
+            addFormattedMessage(data.response, 'bot');
         } else if (data.error) {
             addMessage(`⚠️ ${data.error}\n\n📱 Try our Telegram bot: @JoshuaGiwaBot`, 'bot');
         } else {
@@ -88,6 +89,10 @@ function quickCommand(command) {
     sendMessage();
 }
 
+// ============================================
+// MESSAGE DISPLAY - Simple Formatting
+// ============================================
+
 function addMessage(text, sender) {
     const messagesDiv = document.getElementById('chatMessages');
     if (!messagesDiv) return;
@@ -98,11 +103,46 @@ function addMessage(text, sender) {
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
 
+    // Simple formatting: just handle line breaks
     let formattedText = text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/`(.*?)`/g, '<code>$1</code>')
-        .replace(/\n/g, '<br>');
+        .replace(/\n/g, '<br>')
+        .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+
+    // Convert simple bullets (• or -) to styled bullets
+    formattedText = formattedText.replace(/^[•\-]\s/gm, '• ');
+
+    contentDiv.innerHTML = formattedText;
+    messageDiv.appendChild(contentDiv);
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function addFormattedMessage(text, sender) {
+    const messagesDiv = document.getElementById('chatMessages');
+    if (!messagesDiv) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+
+    // Handle simple formatting with line breaks
+    let formattedText = text
+        .replace(/\n/g, '<br>')
+        .replace(/\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;');
+
+    // Convert simple bullets (• or -) to styled bullets
+    formattedText = formattedText.replace(/^[•\-]\s/gm, '• ');
+
+    // Convert bold: *text* to <strong>text</strong>
+    formattedText = formattedText.replace(/\*(.*?)\*/g, '<strong>$1</strong>');
+
+    // Convert italic: _text_ to <em>text</em>
+    formattedText = formattedText.replace(/_(.*?)_/g, '<em>$1</em>');
+
+    // Convert code: `text` to <code>text</code>
+    formattedText = formattedText.replace(/`(.*?)`/g, '<code>$1</code>');
 
     contentDiv.innerHTML = formattedText;
     messageDiv.appendChild(contentDiv);
@@ -121,7 +161,7 @@ function clearChat() {
     if (!messagesDiv) return;
 
     messagesDiv.innerHTML = '';
-    addMessage("👋 Chat cleared! Type /help to see commands or ask me about any suspicious message.", 'bot');
+    addMessage("👋 Chat cleared! I'm here to help you detect scams and give loan advice. What do you need?", 'bot');
 }
 
 function handleKeyPress(event) {
@@ -151,18 +191,15 @@ function filterHelp() {
 // INITIALIZATION
 // ============================================
 
-// Load config and stats
 loadConfig().then(() => {
     loadStats();
 });
 
-// If on chat page, focus the input
 if (isChatPage()) {
     const input = document.getElementById('chatInput');
     if (input) input.focus();
 }
 
-// If on help page, setup search listener
 const helpSearch = document.getElementById('helpSearch');
 if (helpSearch) {
     helpSearch.addEventListener('input', filterHelp);
