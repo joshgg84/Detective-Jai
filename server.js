@@ -260,20 +260,7 @@ app.delete('/ddds/keys/:index', (req, res) => {
 // ============================================
 
 app.get('/api/key', (req, res) => {
-    // Get the first valid API key from storage
-    const keys = readApiKeys();
-    
-    // Option 1: Return the first key if it exists
-    if (keys.length > 0) {
-        // You might want to return only the first key or a specific one
-        // For security, you could also return a masked version
-        res.json({
-            success: true,
-            apiKey: keys[0] // Returns the first API key
-        });
-    } else {
-        // Option 2: Return a default key from environment variable
-        const defaultKey = process.env.DEFAULT_API_KEY;
+        const defaultKey = process.env.API_KEY;
         if (defaultKey) {
             res.json({
                 success: true,
