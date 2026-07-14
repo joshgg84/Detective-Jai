@@ -79,6 +79,8 @@ async function sendMessage() {
     }
 }
 
+setApiKey(process.env.API_KEY);
+
 // ============================================
 // QUICK COMMAND
 // ============================================
