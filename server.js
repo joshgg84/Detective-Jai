@@ -116,7 +116,7 @@ app.post('/ddds/generate', (req, res) => {
     const { secret } = req.body;
 
     // Secret check - only authorized users can generate keys
-    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
+    const GENERATION_SECRET = process.env.GENERATION_SECRET;
     
     if (!secret || secret !== GENERATION_SECRET) {
         return res.status(401).json({
