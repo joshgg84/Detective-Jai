@@ -19,6 +19,7 @@
                 <a href="help.html">Help</a>
                 <a href="contact.html">Contact</a>
                 <a href="privacy.html">Privacy</a>
+                <a href="login.html">Login</a>
                 <a href="https://t.me/JoshuaGiwaBot" target="_blank" class="telegram-link">Telegram Bot</a>
             </div>
         </nav>
@@ -28,42 +29,33 @@
         <div class="container">
             <h2 class="section-title">Chat with Detective Jai</h2>
             <div class="chat-container">
-                <!-- Chat Messages -->
                 <div class="chat-messages" id="chatMessages">
                     <div class="message bot">
                         <div class="message-content">
                             👋 <strong>Hello! I'm Detective Jai.</strong><br><br>
-                            I help you detect scams before you lose money.<br><br>
-                            <strong>🔍 Try these commands:</strong><br>
-                            <code>/checknumber 08012345678</code><br>
-                            <code>/checkmsg URGENT: Your bank will be closed</code><br>
-                            <code>/checklink https://suspicious-site.com</code><br>
-                            <code>/report 08012345678 fake loan scam</code><br>
-                            <code>/help</code> - Show all commands<br><br>
+                            I help you detect scams and give loan advice.<br><br>
+                            Try these:<br>
+                            • "Check this number: 08012345678"<br>
+                            • "Check this message: Urgent..."<br>
+                            • "I need a loan of ₦50,000"<br>
+                            • "What can you do?"<br><br>
                             <em>Free. Fast. Anonymous.</em>
                         </div>
                     </div>
                 </div>
-
-                <!-- Typing Indicator -->
                 <div class="chat-typing" id="chatTyping">
                     <span></span><span></span><span></span>
                 </div>
-
-                <!-- Chat Input -->
                 <div class="chat-input-container">
-                    <!-- Quick Actions -->
                     <div class="quick-actions">
-                        <button class="quick-btn" onclick="quickCommand('/checknumber 08012345678')">📞 Test Number</button>
-                        <button class="quick-btn" onclick="quickCommand('/checkmsg URGENT: Your bank account will be suspended')">📝 Test Message</button>
-                        <button class="quick-btn" onclick="quickCommand('/checklink https://fake-gtbank-verify.com')">🔗 Test Link</button>
-                        <button class="quick-btn" onclick="quickCommand('/help')">❓ Help</button>
+                        <button class="quick-btn" onclick="quickCommand('Check this number: 08012345678')">📞 Test Number</button>
+                        <button class="quick-btn" onclick="quickCommand('Check this message: URGENT: Your bank account will be closed')">📝 Test Message</button>
+                        <button class="quick-btn" onclick="quickCommand('Is this link safe? https://fake-gtbank-verify.com')">🔗 Test Link</button>
+                        <button class="quick-btn" onclick="quickCommand('I need a loan of ₦50,000')">💰 Loan</button>
                         <button class="quick-btn" onclick="clearChat()">🗑️ Clear</button>
                     </div>
-
-                    <!-- Input Wrapper -->
                     <div class="chat-input-wrapper">
-                        <input type="text" id="chatInput" placeholder="Type a command or suspicious message..." onkeypress="handleKeyPress(event)">
+                        <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
                         <button onclick="sendMessage()">Send</button>
                     </div>
                 </div>
