@@ -130,13 +130,41 @@ function authenticateApiKey(req, res, next) {
 }
 
 // ============================================
-// 🔑 GENERATE API KEY ENDPOINT
+// 🔑 GENERATE API KEY ENDPOINT (GET & POST)
 // ============================================
 
+// GET endpoint - use query parameter
+app.get('/ddds/generate', (req, res) => {
+    const { secret } = req.query;
+    
+    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
+    
+    if (!secret || secret !== GENERATION_SECRET) {
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid generation secret.'
+        });
+    }
+
+    const newKey = generateApiKey();
+    const keys = readApiKeys();
+    keys.push(newKey);
+    writeApiKeys(keys);
+
+    console.log(`🔑 New API key generated: ${newKey.substring(0, 8)}...`);
+
+    res.json({
+        success: true,
+        apiKey: newKey,
+        message: 'API key generated successfully.',
+        totalKeys: keys.length
+    });
+});
+
+// POST endpoint - use body parameter (for compatibility)
 app.post('/ddds/generate', (req, res) => {
     const { secret } = req.body;
-
-    // Secret check - only authorized users can generate keys
+    
     const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
     
     if (!secret || secret !== GENERATION_SECRET) {
@@ -481,7 +509,7 @@ app.use((req, res) => {
 app.listen(PORT, () => {
     console.log('========================================');
     console.log('🕵️ Detective Jai Full Backend');
-    console.log(`📍 URL: http://https://detective-jai.onrender.com:${PORT}`);
+    console.log(`📍 URL: https://detective-jai.onrender.com:${PORT}`);
     console.log(`📡 Detection API: ${DETECTION_API_URL}`);
     console.log('📄 Pages:');
     console.log(`   - Home: http://localhost:${PORT}/`);
