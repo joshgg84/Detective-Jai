@@ -4,13 +4,47 @@ const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DETECTION_API_URL = process.env.DETECTION_API_URL || 'https://scam-detection-vcn3.onrender.com';
 
 // ============================================
-// DATA STORAGE (JSON files)
+// 📋 API KEY STORAGE (JSON file)
+// ============================================
+
+const KEYS_FILE = path.join(__dirname, 'data', 'api_keys.json');
+
+// Initialize keys file if it doesn't exist
+if (!fs.existsSync(KEYS_FILE)) {
+    fs.writeFileSync(KEYS_FILE, JSON.stringify([]));
+}
+
+function readApiKeys() {
+    try {
+        return JSON.parse(fs.readFileSync(KEYS_FILE));
+    } catch {
+        return [];
+    }
+}
+
+function writeApiKeys(keys) {
+    fs.writeFileSync(KEYS_FILE, JSON.stringify(keys, null, 2));
+}
+
+function isValidApiKey(key) {
+    const keys = readApiKeys();
+    return keys.includes(key);
+}
+
+function generateApiKey() {
+    // Generate a random 32-character hex string
+    return crypto.randomBytes(32).toString('hex');
+}
+
+// ============================================
+// DATA STORAGE (Users)
 // ============================================
 
 const DATA_DIR = path.join(__dirname, 'data');
@@ -49,48 +83,170 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // ============================================
-// CHAT API ENDPOINT — Main chat handler
+// 🔐 API KEY AUTHENTICATION MIDDLEWARE
 // ============================================
 
-app.post('/api/chat', async (req, res) => {
+function authenticateApiKey(req, res, next) {
+    const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    
+    if (!apiKey) {
+        return res.status(401).json({
+            success: false,
+            error: 'API key required.',
+            code: 'MISSING_API_KEY'
+        });
+    }
+
+    if (!isValidApiKey(apiKey)) {
+        return res.status(403).json({
+            success: false,
+            error: 'Invalid API key.',
+            code: 'INVALID_API_KEY'
+        });
+    }
+
+    next();
+}
+
+// ============================================
+// 🔑 GENERATE API KEY ENDPOINT
+// ============================================
+
+app.post('/ddds/generate', (req, res) => {
+    const { secret } = req.body;
+
+    // Secret check - only authorized users can generate keys
+    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
+    
+    if (!secret || secret !== GENERATION_SECRET) {
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid generation secret.'
+        });
+    }
+
+    const newKey = generateApiKey();
+    const keys = readApiKeys();
+    keys.push(newKey);
+    writeApiKeys(keys);
+
+    console.log(`🔑 New API key generated: ${newKey.substring(0, 8)}...`);
+
+    res.json({
+        success: true,
+        apiKey: newKey,
+        message: 'API key generated successfully.',
+        totalKeys: keys.length
+    });
+});
+
+// ============================================
+// 📋 LIST API KEYS ENDPOINT (Admin)
+// ============================================
+
+app.get('/ddds/keys', (req, res) => {
+    const { secret } = req.query;
+
+    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
+    
+    if (!secret || secret !== GENERATION_SECRET) {
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid generation secret.'
+        });
+    }
+
+    const keys = readApiKeys();
+    // Only show first 8 characters for security
+    const maskedKeys = keys.map(key => ({
+        key: key.substring(0, 8) + '...',
+        full: key,
+        index: keys.indexOf(key)
+    }));
+
+    res.json({
+        success: true,
+        total: keys.length,
+        keys: maskedKeys
+    });
+});
+
+// ============================================
+// 🗑️ REVOKE API KEY ENDPOINT (Admin)
+// ============================================
+
+app.delete('/ddds/keys/:index', (req, res) => {
+    const { secret } = req.body;
+    const index = parseInt(req.params.index);
+
+    const GENERATION_SECRET = process.env.GENERATION_SECRET || 'admin-secret-key';
+    
+    if (!secret || secret !== GENERATION_SECRET) {
+        return res.status(401).json({
+            success: false,
+            error: 'Invalid generation secret.'
+        });
+    }
+
+    const keys = readApiKeys();
+    if (index < 0 || index >= keys.length) {
+        return res.status(404).json({
+            success: false,
+            error: 'Key not found.'
+        });
+    }
+
+    const removed = keys.splice(index, 1);
+    writeApiKeys(keys);
+
+    res.json({
+        success: true,
+        message: `Key ${removed[0].substring(0, 8)}... revoked successfully.`,
+        totalKeys: keys.length
+    });
+});
+
+// ============================================
+// 🔐 CHAT API — Protected with API Key
+// ============================================
+
+app.post('/api/chat', authenticateApiKey, async (req, res) => {
     const { message, userId } = req.body;
     
     if (!message) {
-        return res.status(400).json({ 
-            success: false, 
-            error: 'Message is required' 
+        return res.status(400).json({
+            success: false,
+            error: 'Message is required'
         });
     }
 
     console.log(`📨 Chat: ${message.substring(0, 50)}...`);
 
     try {
-        // Try to use natural.js if available
         let response;
         try {
             const natural = require('./natural.js');
             response = natural.processNaturalInput(message, userId || 'web_user', 'web_user');
         } catch (err) {
-            // Fallback if natural.js doesn't exist
             console.log('⚠️ natural.js not found, using fallback');
             response = getFallbackResponse(message);
         }
         
-        res.json({ 
-            success: true, 
-            response: response 
+        res.json({
+            success: true,
+            response: response
         });
     } catch (err) {
         console.error('Chat error:', err);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Internal server error' 
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error'
         });
     }
 });
 
 // ============================================
-// FALLBACK RESPONSE (if natural.js is missing)
+// FALLBACK RESPONSE
 // ============================================
 
 function getFallbackResponse(message) {
@@ -132,8 +288,11 @@ function getFallbackResponse(message) {
 // ============================================
 
 app.get('/api/config', (req, res) => {
+    // This endpoint doesn't return the API key anymore
+    // The frontend gets the key from the admin/developer
     res.json({
-        botApiUrl: `${DETECTION_API_URL}/api/chat`
+        botApiUrl: '/api/chat',
+        requiresApiKey: true
     });
 });
 
@@ -242,7 +401,7 @@ app.get('/api/user/:id', (req, res) => {
 });
 
 // ============================================
-// ADMIN — POST PASSWORD
+// ADMIN ENDPOINTS
 // ============================================
 
 app.post('/api/admin', (req, res) => {
@@ -313,6 +472,7 @@ app.listen(PORT, () => {
     console.log(`   - Login: http://localhost:${PORT}/login.html`);
     console.log(`   - Admin: http://localhost:${PORT}/admin.html`);
     console.log('========================================');
+    console.log(`🔑 Total API Keys: ${readApiKeys().length}`);
     console.log(`👥 Users: ${readUsers().length} registered`);
     console.log('========================================');
 });
