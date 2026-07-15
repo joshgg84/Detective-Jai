@@ -4,8 +4,143 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Login - Detective Jai</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4192056018752882" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .lang-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #cbd5e1;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .lang-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+        }
+        .auth-section {
+            padding: 60px 0 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+        }
+        .auth-card {
+            max-width: 420px;
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 40px 32px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 0 auto;
+        }
+        .auth-card h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .auth-subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 32px;
+            font-size: 0.9rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #cbd5e1;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            border-color: #667eea;
+        }
+        .form-group input::placeholder {
+            color: #64748b;
+        }
+        .btn-full {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 14px;
+        }
+        .btn-full:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .auth-switch {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        .auth-switch a {
+            color: #a78bfa;
+            text-decoration: none;
+        }
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+        .auth-message {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            min-height: 24px;
+        }
+        .header, .footer, .nav-links, .telegram-link {
+            display: flex;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.2s;
+            padding: 8px 12px;
+        }
+        .nav-links a:hover {
+            color: #a78bfa;
+        }
+        .telegram-link {
+            background: #0088cc;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white !important;
+        }
+        .telegram-link:hover {
+            background: #00aaff;
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -29,32 +164,32 @@
     <section class="auth-section">
         <div class="container">
             <div class="auth-card">
-                <h1>Welcome Back</h1>
-                <p class="auth-subtitle">Log in to your Detective Jai account</p>
+                <h1 id="loginTitle">Welcome Back</h1>
+                <p class="auth-subtitle" id="loginSubtitle">Log in to continue your conversation history</p>
+
+                <!-- Language Selector -->
+                <div class="language-selector">
+                    <button class="lang-btn active" data-lang="en" onclick="setLanguage('en')">🇬🇧 English</button>
+                    <button class="lang-btn" data-lang="pidgin" onclick="setLanguage('pidgin')">🇳🇬 Pidgin</button>
+                    <button class="lang-btn" data-lang="yo" onclick="setLanguage('yo')">🇳🇬 Yorùbá</button>
+                    <button class="lang-btn" data-lang="ha" onclick="setLanguage('ha')">🇳🇬 Hausa</button>
+                </div>
 
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     <div class="form-group">
-                        <label for="loginEmail">Email Address</label>
-                        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                        <label id="labelEmail">Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" placeholder="Enter your password" required>
-                    </div>
-
-                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="checkbox" style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="remember">
-                            <label for="remember" style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 0; cursor: pointer;">Remember me</label>
-                        </div>
-                        <a href="#" style="color: #a78bfa; font-size: 0.8rem; text-decoration: none;">Forgot password?</a>
+                        <label id="labelPassword">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" required>
                     </div>
 
                     <button type="submit" class="btn-primary btn-full" id="loginBtn">Log In</button>
                 </form>
 
-                <p class="auth-switch">
+                <p class="auth-switch" id="authSwitch">
                     Don't have an account? <a href="signup.html">Sign up</a>
                 </p>
 
@@ -70,15 +205,105 @@
     </footer>
 
     <script>
+        // ============================================
+        // LANGUAGE TRANSLATIONS
+        // ============================================
+
+        const translations = {
+            en: {
+                title: 'Welcome Back',
+                subtitle: 'Log in to continue your conversation history',
+                email: 'Email Address',
+                password: 'Password',
+                login: 'Log In',
+                noAccount: "Don't have an account?",
+                signUp: 'Sign up',
+                emailPlaceholder: 'Enter your email',
+                passwordPlaceholder: 'Enter your password',
+                loginLoading: 'Logging in...',
+                waitMsg: '⏳ Please wait...'
+            },
+            pidgin: {
+                title: 'Welcome Back',
+                subtitle: 'Log in to continue your conversation history',
+                email: 'Email Address',
+                password: 'Password',
+                login: 'Log In',
+                noAccount: "You no get account?",
+                signUp: 'Sign up',
+                emailPlaceholder: 'Enter your email',
+                passwordPlaceholder: 'Enter your password',
+                loginLoading: 'Logging in...',
+                waitMsg: '⏳ Please wait...'
+            },
+            yo: {
+                title: 'Káàbọ̀ Padà',
+                subtitle: 'Wọlé láti tẹ̀síwájú ìtàn ìbánisọ̀rọ̀ rẹ',
+                email: 'Adírẹ́sì Ímèèlì',
+                password: 'Ọ̀rọ̀ Àṣírí',
+                login: 'Wọlé',
+                noAccount: 'Ṣé o kò ní àkọ́ọ́lẹ̀?',
+                signUp: 'Ṣẹ́ Àkọ́ọ́lẹ̀',
+                emailPlaceholder: 'Ẹ fi adírẹ́sì ímeèlì rẹ síbẹ̀',
+                passwordPlaceholder: 'Ẹ fi ọ̀rọ̀ àṣírí rẹ síbẹ̀',
+                loginLoading: 'Ń wọlé...',
+                waitMsg: '⏳ Jọ̀wọ́ dúró...'
+            },
+            ha: {
+                title: 'Barka da Komowa',
+                subtitle: 'Shiga don ci gaba da tarihin maganganun ku',
+                email: 'Adireshin Imel',
+                password: 'Kalmar Sirri',
+                login: 'Shiga',
+                noAccount: 'Ba ku da asusun?',
+                signUp: 'Ƙirƙiri Asusun',
+                emailPlaceholder: 'Shigar da imel ɗinka',
+                passwordPlaceholder: 'Shigar da kalmar sirri',
+                loginLoading: 'Ana shiga...',
+                waitMsg: '⏳ Da fatan za a jira...'
+            }
+        };
+
+        let currentLang = 'en';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            document.getElementById('loginTitle').textContent = t.title;
+            document.getElementById('loginSubtitle').textContent = t.subtitle;
+            document.getElementById('labelEmail').textContent = t.email;
+            document.getElementById('labelPassword').textContent = t.password;
+            document.getElementById('loginBtn').textContent = t.login;
+            document.getElementById('authSwitch').innerHTML = `${t.noAccount} <a href="signup.html">${t.signUp}</a>`;
+            document.getElementById('email').placeholder = t.emailPlaceholder;
+            document.getElementById('password').placeholder = t.passwordPlaceholder;
+
+            localStorage.setItem('preferredLanguage', lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            setLanguage(savedLang);
+        });
+
+        // ============================================
+        // LOGIN HANDLER
+        // ============================================
+
         async function handleLogin(event) {
             event.preventDefault();
 
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
+            const t = translations[currentLang];
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
             const messageDiv = document.getElementById('loginMessage');
             const submitBtn = document.getElementById('loginBtn');
 
-            // Clear previous message
             messageDiv.textContent = '';
             messageDiv.style.color = '';
 
@@ -88,10 +313,9 @@
                 return;
             }
 
-            // Disable button and show loading
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Logging in...';
-            messageDiv.textContent = '⏳ Please wait...';
+            submitBtn.textContent = t.loginLoading;
+            messageDiv.textContent = t.waitMsg;
             messageDiv.style.color = '#f59e0b';
 
             try {
@@ -107,8 +331,8 @@
                     messageDiv.textContent = '✅ ' + data.message;
                     messageDiv.style.color = '#10b981';
 
-                    // Store user info in localStorage
-                    localStorage.setItem('detectiveJaiUser', JSON.stringify(data.user));
+                    localStorage.setItem('userId', data.user.id);
+                    localStorage.setItem('userName', data.user.fullName);
 
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
@@ -117,123 +341,16 @@
                     messageDiv.textContent = '❌ ' + data.error;
                     messageDiv.style.color = '#ef4444';
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Log In';
+                    submitBtn.textContent = t.login;
                 }
             } catch (err) {
                 console.error('Login error:', err);
                 messageDiv.textContent = '❌ Network error. Please try again.';
                 messageDiv.style.color = '#ef4444';
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Log In';
+                submitBtn.textContent = t.login;
             }
         }
     </script>
-
-    <style>
-        .auth-section {
-            padding: 60px 0 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 70vh;
-        }
-
-        .auth-card {
-            max-width: 420px;
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border-radius: 24px;
-            padding: 40px 32px;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin: 0 auto;
-        }
-
-        .auth-card h1 {
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-            text-align: center;
-        }
-
-        .auth-subtitle {
-            text-align: center;
-            color: #94a3b8;
-            margin-bottom: 32px;
-            font-size: 0.9rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-bottom: 6px;
-            color: #cbd5e1;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.05);
-            color: white;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            border-color: #667eea;
-        }
-
-        .form-group input::placeholder {
-            color: #64748b;
-        }
-
-        .btn-full {
-            width: 100%;
-            text-align: center;
-            justify-content: center;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 14px;
-        }
-
-        .btn-full:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .auth-switch {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
-
-        .auth-switch a {
-            color: #a78bfa;
-            text-decoration: none;
-        }
-
-        .auth-switch a:hover {
-            text-decoration: underline;
-        }
-
-        .auth-message {
-            text-align: center;
-            margin-top: 16px;
-            font-size: 0.9rem;
-            min-height: 24px;
-        }
-
-        .checkbox label {
-            margin-bottom: 0 !important;
-        }
-    </style>
 </body>
 </html>
