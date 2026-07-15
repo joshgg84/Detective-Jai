@@ -1,4 +1,6 @@
-// server.js - Detective Jai Full Backend (No API Keys)
+// server.js - Detective Jai Website Backend
+// Calls the bot API for scam detection
+
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -7,7 +9,9 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DETECTION_API_URL = process.env.DETECTION_API_URL || 'https://scam-detection-vcn3.onrender.com';
+
+// Your bot API URL (Render service URL)
+const BOT_API_URL = process.env.BOT_API_URL || 'https://scam-detection-vcn3.onrender.com';
 
 // ============================================
 // 📁 ENSURE DATA DIRECTORY EXISTS
@@ -20,7 +24,7 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 
 // ============================================
-// DATA STORAGE (Users)
+// DATA STORAGE (Users with Language Preference)
 // ============================================
 
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
@@ -63,11 +67,11 @@ app.use(express.static(path.join(__dirname, 'public'), {
 }));
 
 // ============================================
-// 💬 CHAT API — NO AUTHENTICATION REQUIRED
+// 💬 CHAT API — Calls Bot API
 // ============================================
 
 app.post('/api/chat', async (req, res) => {
-    const { message, userId } = req.body;
+    const { message, userId, language } = req.body;
     
     if (!message) {
         return res.status(400).json({
@@ -79,65 +83,138 @@ app.post('/api/chat', async (req, res) => {
     console.log(`📨 Chat: ${message.substring(0, 50)}...`);
 
     try {
-        let response;
-        try {
-            const natural = require('./natural.js');
-            response = natural.processNaturalInput(message, userId || 'web_user', 'web_user');
-        } catch (err) {
-            console.log('⚠️ natural.js not found, using fallback');
-            response = getFallbackResponse(message);
+        // Call the bot API for scam detection
+        const response = await axios.post(`${BOT_API_URL}/api/chat`, {
+            message: message,
+            userId: userId || 'web_user'
+        }, {
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 60000 // 60 seconds (Render free tier cold start)
+        });
+
+        let reply = response.data.response;
+
+        // If language is pidgin, try to translate the response
+        if (language === 'pidgin' && reply) {
+            reply = convertToPidgin(reply);
         }
-        
+
         res.json({
             success: true,
-            response: response
+            response: reply,
+            language: language || 'en'
         });
+        
     } catch (err) {
-        console.error('Chat error:', err);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error'
+        console.error('Chat error:', err.message);
+        
+        // Fallback response if bot API is down
+        const fallback = getFallbackResponse(message, language);
+        res.json({
+            success: true,
+            response: fallback,
+            fallback: true
         });
     }
 });
 
 // ============================================
-// FALLBACK RESPONSE
+// PIDGIN TRANSLATION (Simple)
 // ============================================
 
-function getFallbackResponse(message) {
+function convertToPidgin(text) {
+    const translations = {
+        '🚨 *ALERT!*': '🚨 *WAHALA!*',
+        '⚠️ *CLEAR*': '⚠️ *KLEAR*',
+        'is a REPORTED SCAMMER': 'na SCAMMER wey people don report',
+        'has no reports': 'no report yet',
+        'Do not send money': 'No send money',
+        'Block immediately': 'Block am immediately',
+        'Still be cautious': 'Still dey careful',
+        'Thank you for your testimonial': 'Thank you for your testimony',
+        'God bless you': 'God bless you',
+        'Help Others Stay Safe': 'Help others stay safe',
+        'Scammers': 'Scammers',
+        'reported': 'wey dem report',
+        'TRUSTED NUMBER': 'TRUSTED NUMBER'
+    };
+    
+    let pidgin = text;
+    for (const [english, pidginText] of Object.entries(translations)) {
+        pidgin = pidgin.replace(new RegExp(english, 'g'), pidginText);
+    }
+    return pidgin;
+}
+
+// ============================================
+// FALLBACK RESPONSE (When Bot API is Down)
+// ============================================
+
+function getFallbackResponse(message, language = 'en') {
     const lower = message.toLowerCase();
     
-    if (lower.includes('hello') || lower.includes('hi')) {
-        return "Hello! I'm Detective Jai. How can I help you today?";
+    // Check for phone number
+    const numberMatch = message.match(/(\+234[\s\-]?\d{3}[\s\-]?\d{3}[\s\-]?\d{4}|0[789][01]\d{8})/);
+    if (numberMatch) {
+        return `✅ Checking number ${numberMatch[0]}...\n\nThis number has no reports. Still be cautious.`;
     }
     
-    if (lower.includes('check') && lower.includes('number')) {
-        const number = message.match(/\d{11}/);
-        if (number) {
-            return `✅ Checking number ${number[0]}...\n\nThis number has no reports. Still be cautious.`;
-        }
-        return "Please send a valid 11-digit phone number.";
-    }
-    
-    if (lower.includes('loan') || lower.includes('need money')) {
-        const amount = message.match(/\d+/);
-        if (amount) {
-            return `💰 I see you need a loan of ₦${amount[0]}.\n\nPlease tell me your monthly income so I can recommend the best option.`;
-        }
-        return "💰 How much do you need? Send it like this: 'I need a loan of ₦50,000'";
+    if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+        return "👋 Hello! I'm Detective Jai. How can I help you today?\n\nTry:\n• Check a number: 'check 08012345678'\n• Check a message: 'check this message: ...'\n• Report: 'report 08012345678'";
     }
     
     if (lower.includes('help') || lower.includes('what can you do')) {
-        return "📚 What I Can Do:\n\n• Check numbers: 'Check this number: 080...'\n• Check messages: 'Check this message: ...'\n• Check links: 'Is this link safe? ...'\n• Loan advice: 'I need a loan of ₦...'\n• Stats: 'How many scammers have you caught?'";
+        return `📚 *WHAT I CAN DO*\n\n• Check numbers: "check 08012345678"\n• Check messages: "check this message: URGENT..."\n• Check links: "check link: https://..."\n• Report scammers: "report 08012345678"\n• Loan advice: "I need a loan of ₦..."\n• Stats: "how many scammers"\n• Learn scams: "what is phishing"\n\nJust type naturally!`;
+    }
+    
+    if (lower.includes('report')) {
+        const number = message.match(/(\+234[\s\-]?\d{3}[\s\-]?\d{3}[\s\-]?\d{4}|0[789][01]\d{8})/);
+        if (number) {
+            return `📢 Thank you for reporting ${number[0]}.\n\nAdmin will review this number.`;
+        }
+        return "📢 To report a scammer, send: 'report 08012345678'";
     }
     
     if (lower.includes('stats') || lower.includes('how many')) {
-        return "📊 I have caught 47 scammers so far. Report suspicious numbers to help me catch more!";
+        return `📊 I have caught scammers so far.\n\nReport suspicious numbers to help me catch more!`;
     }
     
-    return "I'm not sure I understand. Try these:\n\n• 'Check this number: 080...'\n• 'I need a loan of ₦...'\n• 'What can you do?'\n• 'How many scammers have you caught?'";
+    return `🤔 I'm not sure I understand.\n\nTry:\n• "check 08012345678"\n• "report 08012345678"\n• "help"\n• "what is phishing"`;
 }
+
+// ============================================
+// LANGUAGE PREFERENCE ENDPOINT
+// ============================================
+
+app.post('/api/user/language', (req, res) => {
+    const { userId, language } = req.body;
+    
+    if (!userId || !language) {
+        return res.status(400).json({
+            success: false,
+            error: 'User ID and language are required'
+        });
+    }
+    
+    const users = readUsers();
+    const userIndex = users.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({
+            success: false,
+            error: 'User not found'
+        });
+    }
+    
+    users[userIndex].preferredLanguage = language;
+    writeUsers(users);
+    
+    res.json({
+        success: true,
+        message: 'Language preference updated',
+        language: language
+    });
+});
 
 // ============================================
 // CONFIG ENDPOINT
@@ -145,8 +222,10 @@ function getFallbackResponse(message) {
 
 app.get('/api/config', (req, res) => {
     res.json({
-        botApiUrl: '/api/chat',
-        requiresApiKey: false
+        botApiUrl: `${BOT_API_URL}/api/chat`,
+        requiresApiKey: false,
+        websiteUrl: `https://${req.get('host')}`,
+        supportedLanguages: ['en', 'pidgin', 'yo', 'ha']
     });
 });
 
@@ -156,7 +235,7 @@ app.get('/api/config', (req, res) => {
 
 app.get('/api/stats', async (req, res) => {
     try {
-        const response = await axios.get(`${DETECTION_API_URL}/api/stats`, { timeout: 5000 });
+        const response = await axios.get(`${BOT_API_URL}/api/stats`, { timeout: 5000 });
         res.json(response.data);
     } catch (err) {
         console.error('❌ Stats fetch error:', err.message);
@@ -200,6 +279,7 @@ app.post('/api/signup', (req, res) => {
         email,
         phone: phone || '',
         password,
+        preferredLanguage: 'en',
         createdAt: new Date().toISOString()
     };
 
@@ -236,7 +316,12 @@ app.post('/api/login', (req, res) => {
     res.json({
         success: true,
         message: 'Login successful!',
-        user: { id: user.id, fullName: user.fullName, email: user.email }
+        user: { 
+            id: user.id, 
+            fullName: user.fullName, 
+            email: user.email,
+            preferredLanguage: user.preferredLanguage || 'en'
+        }
     });
 });
 
@@ -250,7 +335,13 @@ app.get('/api/user/:id', (req, res) => {
 
     res.json({
         success: true,
-        user: { id: user.id, fullName: user.fullName, email: user.email, phone: user.phone }
+        user: { 
+            id: user.id, 
+            fullName: user.fullName, 
+            email: user.email, 
+            phone: user.phone,
+            preferredLanguage: user.preferredLanguage || 'en'
+        }
     });
 });
 
@@ -274,6 +365,7 @@ app.post('/api/admin', (req, res) => {
         fullName: user.fullName,
         email: user.email,
         phone: user.phone || 'Not provided',
+        preferredLanguage: user.preferredLanguage || 'en',
         createdAt: user.createdAt
     }));
 
@@ -313,9 +405,9 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
     console.log('========================================');
-    console.log('🕵️ Detective Jai Full Backend');
+    console.log('🕵️ Detective Jai Website Backend');
     console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`📡 Detection API: ${DETECTION_API_URL}`);
+    console.log(`📡 Bot API: ${BOT_API_URL}`);
     console.log('📄 Pages:');
     console.log(`   - Home: http://localhost:${PORT}/`);
     console.log(`   - Chat: http://localhost:${PORT}/chat.html`);
